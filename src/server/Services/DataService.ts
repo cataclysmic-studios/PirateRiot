@@ -1,6 +1,6 @@
 import { KnitServer as Knit, RemoteSignal, Signal } from "@rbxts/knit";
 import { RunService } from "@rbxts/services";
-import { Data } from "server/Classes/Data";
+import { Data } from "shared/Classes/Data";
 import DataStore2 from "@rbxts/datastore2";
 import Logger from "shared/Logger";
 
@@ -12,11 +12,10 @@ declare global {
 
 const DataManager = Knit.CreateService({
     Name: "DataManager",
-    DataUpdated: new Signal<(plr: Player, name: string, value: unknown) => void>(),
 
     Client: {
-        DataUpdated: new RemoteSignal<(name: string, value: unknown) => void>(),
-        Get<T = unknown>(plr: Player, name: string, defaultValue?: T): T {
+        DataUpdated: new RemoteSignal<(name: string, value: defined) => void>(),
+        Get<T = defined>(plr: Player, name: string, defaultValue?: T): T {
             return this.Server.Get(plr, name, defaultValue);
         },
 
@@ -26,7 +25,7 @@ const DataManager = Knit.CreateService({
     },
 
     KnitInit() {
-        Logger.ComponentActive("DataService");
+        Logger.ComponentActive(this.Name);
         DataStore2.Combine("DATA", ...Data);
     },
 
@@ -37,7 +36,7 @@ const DataManager = Knit.CreateService({
             return DataStore2<V>(name, plr);
     },
 
-    Get<V = unknown>(plr: Player, name: string, defaultValue?: V): V {
+    Get<V = defined>(plr: Player, name: string, defaultValue?: V): V {
         const store = this.GetRawStore<V>(plr, name);
         return store.Get(defaultValue) as V;
     },

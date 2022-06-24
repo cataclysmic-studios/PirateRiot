@@ -2,5 +2,5 @@
 /out
 /include
 *.tsbuildinfo
-.eslintrc
-.vscode
+/.eslintrc
+/.vscode
