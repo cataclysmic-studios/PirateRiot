@@ -18,7 +18,7 @@ export default class Logger {
     }
 
     public static UnhandledCase(msg: unknown): void {
-        this.Log(`Unhandled Case`, msg, true);
+        this.Log("Unhandled Case", msg, true);
     }
 
     public static UtilError(methodName: string, msg: unknown): void {

@@ -45,7 +45,6 @@ const RoundService = Knit.CreateService({
 
     ToggleSpawns(map: Model, on: boolean): void {
         const spawns = <SpawnLocation[]>WaitFor<Folder>(map, "Spawns").GetChildren();
-        Logger.Debug("Turning spawns for", map.Name, on ? "on" : "off");
         for (const spawn of spawns)
             spawn.Enabled = on;
     },
