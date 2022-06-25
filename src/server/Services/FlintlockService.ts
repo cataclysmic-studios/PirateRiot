@@ -57,8 +57,6 @@ const FlintlockService = Knit.CreateService({
         if (!controller) return;
         const animName = aType + name;
         const anim = WaitFor<Animation>(Replicated.Assets.Animations, animName).Clone();
-        Logger.Debug("Anim:", anim, "AnimName:", animName); //anim is nil
-
         let track: AnimationTrack;
         if (controller.ClassName === "Humanoid")
             track = (<Humanoid>controller)?.LoadAnimation(anim);
