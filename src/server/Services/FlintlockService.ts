@@ -1,4 +1,4 @@
-import { KnitServer as Knit } from "@rbxts/knit";
+import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
 import { ReplicatedFirst as Replicated } from "@rbxts/services";
 import Logger from "shared/Logger";
 import WaitFor from "shared/Util/WaitFor";
@@ -17,6 +17,7 @@ const FlintlockService = Knit.CreateService({
     Name: "FlintlockService",
 
     Client: {
+        ReloadEnded: new RemoteSignal<() => void>(),
         StopAnims(plr: Player): void {
             this.Server.StopAnims(plr);
         },
@@ -52,12 +53,12 @@ const FlintlockService = Knit.CreateService({
         flintlock.Parent = char
     },
 
-    PlayAnim(plr: Player, aType: AnimType, name: AnimName, controller?: AnimationController | Humanoid): void {
+    PlayAnim(plr: Player, aType: AnimType, name: AnimName, controller?: AnimationController | Humanoid): AnimationTrack | undefined {
         if (!controller) return;
-
         const animName = aType + name;
-        const anim = WaitFor<Animation>(Replicated.Assets.Animations, animName);
-        Logger.Debug("Anim:", anim);
+        const anim = WaitFor<Animation>(Replicated.Assets.Animations, animName).Clone();
+        Logger.Debug("Anim:", anim, "AnimName:", animName); //anim is nil
+
         let track: AnimationTrack;
         if (controller.ClassName === "Humanoid")
             track = (<Humanoid>controller)?.LoadAnimation(anim);
@@ -67,12 +68,20 @@ const FlintlockService = Knit.CreateService({
         }
 
         storedAnims.set(animName + "_" + plr.Name, track);
-        track?.Play();
+        track.Stopped.Connect(() => {
+            storedAnims.delete(animName + "_" + plr.Name);
+            anim.Destroy();
+        });
+        track.Play();
+
+        return track;
     },
 
     PlayCharAnim(plr: Player, name: AnimName): void {
         const controller = plr.Character?.FindFirstChildOfClass("Humanoid");
-        this.PlayAnim(plr, "Char", name, controller);
+        const track = this.PlayAnim(plr, "Char", name, controller);
+        if (name === "Fire")
+            track?.Stopped.Connect(() => this.Client.ReloadEnded.Fire(plr))
     },
 
     PlayFlintlockAnim(plr: Player, name: AnimName): void {

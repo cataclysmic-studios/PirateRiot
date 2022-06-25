@@ -6,12 +6,33 @@ interface ReplicatedFirst extends Instance {
 		};
 	};
 	Assets: Folder & {
+		FireSound: Sound;
+		ReloadSound: Sound;
 		Animations: Folder & {
 			FlintlockIdle: Animation;
+			CharFire: Animation;
+			CharIdle: Animation;
 			FlintlockFire: Animation;
+			something: Animation;
 		};
-		ReloadSound: Sound;
-		FireSound: Sound;
+		Crosshair: ScreenGui & {
+			Box: Frame & {
+				UIScale: UIScale;
+				B: Frame & {
+					UIGradient: UIGradient;
+				};
+				R: Frame & {
+					UIGradient: UIGradient;
+				};
+				T: Frame & {
+					UIGradient: UIGradient;
+				};
+				UIAspectRatioConstraint: UIAspectRatioConstraint;
+				L: Frame & {
+					UIGradient: UIGradient;
+				};
+			};
+		};
 		Flintlock: Model & {
 			AnimationController: AnimationController & {
 				Animator: Animator;
