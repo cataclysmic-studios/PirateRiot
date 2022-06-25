@@ -2,6 +2,7 @@ import { KnitClient as Knit } from "@rbxts/knit";
 import { Player } from "@rbxts/knit/Knit/KnitClient";
 import { ReplicatedFirst as Replicated, RunService } from "@rbxts/services";
 import UI from "shared/UI";
+import Tweenable from "shared/Util/Tweenable";
 
 declare global {
     interface KnitControllers {
@@ -37,6 +38,22 @@ const CrosshairController = Knit.CreateController({
          };
     },
 
+    HitAnim(head: boolean): void {
+        const color = head ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(127, 127, 0);
+        const ch = gui.Box;
+        const style = Enum.EasingStyle.Sine;
+        const time = .15;
+        const t = new Tweenable(ch.T, time, style),
+            b = new Tweenable(ch.B, time, style),
+            l = new Tweenable(ch.L, time, style),
+            r = new Tweenable(ch.R, time, style);
+        
+        const lines = [t, b, l, r];
+        for (const line of lines)
+            line.TweenIn({ BackgroundColor3: color })
+                .Completed.Connect(() => line.TweenOut({ BackgroundColor3: Color3.fromRGB(255, 255, 255) }));
+    },
+
     FireAnim(): void {
         //todo: tween each part of crosshair diff direction (gross)
         const ch = gui.Box;
@@ -45,8 +62,8 @@ const CrosshairController = Knit.CreateController({
             l = this.GetTweenPositions(ch.L),
             r = this.GetTweenPositions(ch.R);
 
-        const time = .05;
-        const dir = Enum.EasingDirection.In, style = Enum.EasingStyle.Sine
+        const time = .06;
+        const dir = Enum.EasingDirection.InOut, style = Enum.EasingStyle.Sine
         ch.T.TweenPosition(t.Open, dir, style, time, undefined, () => {
             ch.T.TweenPosition(t.Closed, dir, style, time);
         });

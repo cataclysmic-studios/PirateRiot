@@ -1,6 +1,6 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import { Player } from "@rbxts/knit/Knit/KnitClient";
-import { Debris, Players, RunService, UserInputService as UIS, Workspace as World } from "@rbxts/services";
+import { Debris, Players, ReplicatedFirst as Replicated, RunService, SoundService, UserInputService as UIS, Workspace as World } from "@rbxts/services";
 import Logger from "shared/Logger";
 
 declare global {
@@ -22,7 +22,6 @@ const FlintlockController = Knit.CreateController({
         const crosshair = Knit.GetController("CrosshairController");
         this.Equipped = eq ?? !this.Equipped;
         
-        Logger.Debug("Flintlock toggled: ", this.Equipped);
         crosshair.Toggle(this.Equipped);
         if (this.Equipped) {    
             UIS.MouseIconEnabled = false;
@@ -36,13 +35,23 @@ const FlintlockController = Knit.CreateController({
         }
     },
 
+    CreateMuzzleFlashVFX(muzzle: Part): void {
+        for (const p of muzzle.GetDescendants())
+            if (p.IsA("ParticleEmitter"))
+                task.spawn(() => {
+                    p.Enabled = true;
+                    task.wait(.05);
+                    p.Enabled = false;
+                });
+    },
+
     Fire(): void {
         this.CanShoot = false;
         const flintlockServer = Knit.GetService("FlintlockService");
         const crosshair = Knit.GetController("CrosshairController");
         const char = Player.Character!;
         const flintlock = char.WaitForChild("Flintlock")
-        const muzzle = <Part>flintlock.WaitForChild("Muzzle"); //todo: muzzle flash vfx
+        const muzzle = <Part>flintlock.WaitForChild("Muzzle");
         const params = new RaycastParams();
         params.FilterDescendantsInstances = [char];
         params.FilterType = Enum.RaycastFilterType.Blacklist;
@@ -59,8 +68,15 @@ const FlintlockController = Knit.CreateController({
             const char = part.FindFirstAncestorOfClass("Model");
             const hum = char?.FindFirstChildOfClass("Humanoid");
             if (hum) {
+                if (hum.Health === 0) return;
                 Logger.Debug(Player, "shot", char!.Name);
-                hum.TakeDamage(100);
+
+                flintlockServer.HitPlayer(char!);
+                const headshot = part.Name === "Head"
+                crosshair.HitAnim(headshot);
+                this.CreateSound(Replicated.Assets.Sounds.Kill);
+                if (headshot)
+                    this.CreateSound(Replicated.Assets.Sounds.Headshot);
             }
         }
 
@@ -69,6 +85,14 @@ const FlintlockController = Knit.CreateController({
         flintlockServer.PlayCharAnim("Fire");
         flintlockServer.PlayFlintlockAnim("Fire");
         flintlockServer.CreateGunshotSound();
+        this.CreateMuzzleFlashVFX(muzzle);
+    },
+
+    CreateSound(soundAsset: Sound): void {
+        const sound = soundAsset.Clone();
+        sound.Parent = SoundService;
+        sound.Play();
+        Debris.AddItem(sound, 5);
     },
 
     CreateDebugTracer(startPos: Vector3, endPos: Vector3): void {

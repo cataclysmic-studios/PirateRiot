@@ -18,6 +18,9 @@ const FlintlockService = Knit.CreateService({
 
     Client: {
         ReloadEnded: new RemoteSignal<() => void>(),
+        HitPlayer(plr: Player, char: Model): void {
+            this.Server.HitPlayer(plr, char);
+        },
         StopAnims(plr: Player): void {
             this.Server.StopAnims(plr);
         },
@@ -36,6 +39,11 @@ const FlintlockService = Knit.CreateService({
         CreateGunshotSound(plr: Player): void {
             this.Server.CreateGunshotSound(plr);
         }
+    },
+
+    HitPlayer(plr: Player, char: Model): void {
+        const hum = char.FindFirstChildOfClass("Humanoid");
+        hum!.TakeDamage(100);
     },
 
     Unequip(plr: Player): void {
@@ -96,8 +104,8 @@ const FlintlockService = Knit.CreateService({
 
     CreateGunshotSound(plr: Player): void {
         const char = plr.Character;
-        const fireSound = Replicated.Assets.FireSound.Clone();
-        const reloadSound = Replicated.Assets.ReloadSound.Clone();
+        const fireSound = Replicated.Assets.Sounds.Shoot.Clone();
+        const reloadSound = Replicated.Assets.Sounds.Reload.Clone();
         fireSound.Parent = char
         reloadSound.Parent = char
         fireSound.Stopped.Connect(() => reloadSound.Play());

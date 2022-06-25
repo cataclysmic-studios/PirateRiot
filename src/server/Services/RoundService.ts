@@ -3,7 +3,6 @@ import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
 import { Players, ReplicatedFirst as Replicated, RunService, ServerStorage, Workspace as World } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RandomElement from "shared/Util/RandomElement";
-import Teleport from "shared/Util/Teleport";
 import WaitFor from "shared/Util/WaitFor";
 
 declare global {
@@ -53,7 +52,9 @@ const RoundService = Knit.CreateService({
 
     KnitStart(): void {
         Logger.ComponentActive(this.Name);
-        task.wait(10);
+        if (RunService.IsStudio())
+            task.wait(10);
+            
         task.spawn(() => {
             const lobby = WaitFor<Model>(World, "Lobby");
             const settings = WaitFor<Configuration>(ServerStorage, RunService.IsStudio() ? "TestServerSettings" : "ServerSettings");

@@ -1,4 +1,3 @@
-
 import { Component, KnitServer as Knit } from "@rbxts/knit";
 import Logger from "shared/Logger";
 

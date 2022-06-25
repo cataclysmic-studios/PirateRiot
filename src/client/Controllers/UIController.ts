@@ -4,6 +4,12 @@ import { Timer, TimerHandle } from "shared/Util/Timer";
 import FormatInt from "shared/Util/FormatInt";
 import UI from "shared/UI";
 import Logger from "shared/Logger";
+import AnimatedButton from "shared/Util/AnimatedButton";
+import { Lighting, ReplicatedFirst as Replicated, StarterGui, Workspace as World } from "@rbxts/services";
+import WaitFor from "shared/Util/WaitFor";
+import { Tween } from "shared/Util/Tween";
+import Tweenable from "shared/Util/Tweenable";
+import { Player } from "@rbxts/knit/Knit/KnitClient";
 
 declare global {
     interface KnitControllers {
@@ -11,12 +17,31 @@ declare global {
     }
 }
 
+const main = UI.Main();
+const gameStatus = main.Game.Status;
+const gold = main.Game.Gold;
+const chooseCharacter = main.Game.ChooseCharacter;
+const charSelect = main.CharacterSelect;
+let frameOpenCD = false;
 const UIController = Knit.CreateController({
     Name: "UIController",
-    
+
+    KnitStart(): void {
+        Logger.ComponentActive("UIController");
+        StarterGui.SetCoreGuiEnabled("All", false);
+
+        const data = Knit.GetService("DataManager");
+        data.DataUpdated.Connect((k, v) => this.Update(k, v));
+        for (const k of DataKeys)
+            this.Update(k, <defined>data.Get(k, this.GetDefaultValue(k)));
+        
+        this.HandleButtonAnims();
+        this.HandleButtons();
+        this.HandleRounds();
+    },
+
     Update(key: string, value: defined): void {
         const main = UI.Main();
-        Logger.Debug("key:", key, "value:", value);
         switch(key) {
             case "TEST_gold":
             case "gold":
@@ -41,15 +66,97 @@ const UIController = Knit.CreateController({
         return `${min}:${(1e15 + sec + "").sub(-2)}`;
     },
 
-    KnitStart(): void {
-        Logger.ComponentActive("UIController");
-        const main = UI.Main();
-        const gameStatus = main.Game.Status;
-        const data = Knit.GetService("DataManager");
-        data.DataUpdated.Connect((k, v) => this.Update(k, v));
-        for (const k of DataKeys)
-        this.Update(k, <defined>data.Get(k, this.GetDefaultValue(k)));
+    ToggleBlur(on: boolean): void {
+        const blur = WaitFor<BlurEffect>(Lighting, "Blur");
+        const info = new TweenInfo(.4, Enum.EasingStyle.Sine);
+        const size = 15;
+        if (on) {
+            blur.Size = 0;
+            blur.Enabled = true;
+            Tween(blur, info, {
+                Size: size
+            });
+        } else {            
+            Tween(blur, info, {
+                Size: 0
+            }).Completed.Connect(() => blur.Enabled = false);
+        }
+    },
+
+    OpenFrame(name: string): void {
+        if (frameOpenCD) return;
+        frameOpenCD = true;
         
+        const closed = new UDim2(.5, 0, 1.5, 0);
+        const spd = .15;
+        const style = Enum.EasingStyle.Sine
+        if (name === "Game") {
+            for (const frame of main.GetChildren())
+                if (frame.IsA("Frame") && frame.Name !== "Game")
+                    new Tweenable(frame, spd, style).Tween({
+                        Position: closed
+                    }).Completed.Connect(() => frameOpenCD = false);
+
+            main.Game.Visible = true;
+            this.ToggleBlur(false);
+        } else {
+            main.Game.Visible = false;
+            this.ToggleBlur(true);
+            const open = new UDim2(.5, 0, .5, 0);
+            const frame = new Tweenable(WaitFor<Frame>(main, name), spd, style);
+            frame.Tween({
+                Position: open
+            });
+            frameOpenCD = false;
+        }
+    },
+
+    SpinViewportModel(model: Model): void {
+        task.spawn(() => {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                model.SetPrimaryPartCFrame(model.PrimaryPart!.CFrame.mul(CFrame.Angles(0, math.rad(1), 0)));
+                task.wait(.025);
+            }
+        });
+    },
+
+    SelectCharacter(gender: "Male" | "Female"): void {
+        Logger.Debug("Chose", gender, "character");
+        const character = Knit.GetService("CharacterService");
+        this.OpenFrame("Game");
+        character.Change(gender);
+    },
+
+    HandleButtonAnims(): void {
+        const addGold = new AnimatedButton(gold.Add);
+        const chooseChar = new AnimatedButton(chooseCharacter);
+        const closeCharChooser = new AnimatedButton(charSelect.Close);
+        const maleBtn = new AnimatedButton(charSelect.Male);
+        const femaleBtn = new AnimatedButton(charSelect.Female);
+        const pop = 3, spd = .2
+        addGold.HoverPop(pop, spd);
+        addGold.ClickPop(pop, spd);
+        chooseChar.HoverPop(pop, spd);
+        chooseChar.ClickPop(pop, spd);
+        closeCharChooser.HoverPop(pop, spd);
+        closeCharChooser.ClickPop(pop, spd);
+        maleBtn.HoverPop(pop, spd);
+        maleBtn.ClickPop(pop, spd);
+        femaleBtn.HoverPop(pop, spd);
+        femaleBtn.ClickPop(pop, spd);
+    },
+
+    HandleButtons(): void {
+        this.SpinViewportModel(charSelect.Male.Viewport.Male);
+        this.SpinViewportModel(charSelect.Female.Viewport.Female);
+        charSelect.Male.MouseButton1Click.Connect(() => this.SelectCharacter("Male"));
+        charSelect.Female.MouseButton1Click.Connect(() => this.SelectCharacter("Female"));
+        main.CharacterSelect.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
+        chooseCharacter.MouseButton1Click.Connect(() => this.OpenFrame("CharacterSelect"));
+    },
+
+    HandleRounds(): void {
         const round = Knit.GetService("RoundService");
         const flintlock = Knit.GetController("FlintlockController");
         const roundTimer = new Timer();
@@ -65,6 +172,8 @@ const UIController = Knit.CreateController({
             roundTimer.Set(roundLength);
             roundHandle = roundTimer.Start();
             flintlock.Toggle(true);
+            this.OpenFrame("Game")
+            chooseCharacter.Visible = false;
         });
         round.Ended.Connect((intermissionLength: number) => {
             main.Game.Status.Status.Text = "Intermission";
@@ -74,6 +183,7 @@ const UIController = Knit.CreateController({
             roundTimer.Set(intermissionLength);
             intermissionHandle = roundTimer.Start();
             flintlock.Toggle(false);
+            chooseCharacter.Visible = true;
         });
     }
 });
