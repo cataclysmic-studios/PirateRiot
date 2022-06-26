@@ -162,12 +162,15 @@ const UIController = Knit.CreateController({
         const flintlock = Knit.GetController("FlintlockController");
         const crosshair = Knit.GetController("CrosshairController");
         const movementServer = Knit.GetService("MovementService");
-        Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(() => {
+        const toggleOff = () => {
             flintlock.Toggle(false);
             crosshair.Toggle(false);
-        });
+        }
+
+        Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(toggleOff);
         Player.CharacterAdded.Connect(() => {
             if (round.GetStatus() !== GameStatus.InGame) return;
+            toggleOff();
             flintlock.Toggle(true);
             crosshair.Toggle(true);
         });

@@ -12,6 +12,7 @@ declare global {
 const max_dist = 1000;
 
 const ms = Player.GetMouse();
+const sounds = Replicated.Assets.Sounds;
 const FlintlockController = Knit.CreateController({
     Name: "FlintlockController",
     Equipped: false,
@@ -42,6 +43,8 @@ const FlintlockController = Knit.CreateController({
         dust.Particles.Color = new ColorSequence(Color3.fromHSV(h, s / 1.5, v));
         dust.Smoke.Color = new ColorSequence(Color3.fromHSV(h, s / 1.25, v));
         dust.Parent = World.WaitForChild("Ignore");
+        // if (RunService.IsStudio())
+        //     dust.Transparency = 0;
 
         const toggleParticles = () => {
             dust.Particles.Enabled = !dust.Particles.Enabled;
@@ -68,40 +71,39 @@ const FlintlockController = Knit.CreateController({
 
     Fire(): void {
         this.CanShoot = false;
-        const flintlockServer = Knit.GetService("FlintlockService");
         const crosshair = Knit.GetController("CrosshairController");
         crosshair.FireAnim();
-
+        
         const char = Player.Character!;
         const flintlock = char.WaitForChild("Flintlock")
         const muzzle = <Part>flintlock.WaitForChild("Muzzle");
         this.CreateMuzzleFlashVFX(muzzle);
-
+        
         const msLocation = UIS.GetMouseLocation();
         const ray2D = World.CurrentCamera!.ViewportPointToRay(msLocation.X, msLocation.Y);
         const dir = ray2D.Direction.mul(max_dist);
         const params = new RaycastParams();
         params.FilterDescendantsInstances = [char, World.WaitForChild("Ignore")];
         params.FilterType = Enum.RaycastFilterType.Blacklist;
-
+        
+        const flintlockServer = Knit.GetService("FlintlockService");
         const castRes = World.Raycast(ray2D.Origin, dir, params);
         if (castRes) {
             const part = castRes.Instance;
-            const char = part.FindFirstAncestorOfClass("Model");
-            const hum = char?.FindFirstChildOfClass("Humanoid");
-            if (hum) {
+            const victimChar = part.FindFirstAncestorOfClass("Model");
+            const hum = victimChar?.FindFirstChildOfClass("Humanoid");
+            if (victimChar && hum) {
                 if (hum.Health === 0) return;
-                Logger.Debug(Player, "shot", char!.Name);
+                Logger.Debug(Player, "shot", victimChar.Name);
 
-                flintlockServer.HitPlayer(char!);
-                const headshot = part.Name === "Head"
+                flintlockServer.HitPlayer(victimChar);
+                const headshot = part.Name === "Head";
                 crosshair.HitAnim(headshot);
-                this.CreateSound(Replicated.Assets.Sounds.Kill);
-                if (headshot)
-                    this.CreateSound(Replicated.Assets.Sounds.Headshot);
+                this.CreateSound(headshot ? sounds.Headshot : sounds.Kill);
             } else {
                 const rot = CFrame.Angles(0, math.rad(180), math.rad(180));
-                this.CreateHitDustVFX(CFrame.lookAt(castRes.Position, ray2D.Direction).mul(rot), castRes.Instance.Color);
+                const hitCF = new CFrame(castRes.Position, ray2D.Direction);
+                this.CreateHitDustVFX(hitCF, castRes.Instance.Color);
             }
         }
         

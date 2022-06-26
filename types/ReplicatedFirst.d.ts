@@ -17,6 +17,7 @@ interface ReplicatedFirst extends Instance {
 			CharFire: Animation;
 			CharIdle: Animation;
 			FlintlockFire: Animation;
+			Roll: Animation;
 			something: Animation;
 		};
 		VFX: Folder & {

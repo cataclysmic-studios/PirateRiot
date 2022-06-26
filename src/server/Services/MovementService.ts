@@ -1,4 +1,5 @@
 import { KnitServer as Knit } from "@rbxts/knit";
+import { Debris } from "@rbxts/services";
 import Logger from "shared/Logger";
 
 declare global {
@@ -25,6 +26,12 @@ const MovementService = Knit.CreateService({
 
     Roll(plr: Player): void {
         Logger.Debug(plr, "rolled");
+        const char = plr.Character!;
+        const mover = new Instance("BodyVelocity");
+        const root = char.PrimaryPart!;
+        mover.Parent = root;
+        mover.Velocity = root.CFrame.LookVector.mul(1000);
+        Debris.AddItem(mover, 5)
     },
 
     Toggle(plr: Player, on: boolean): void {

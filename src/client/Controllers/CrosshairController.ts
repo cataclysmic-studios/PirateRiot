@@ -42,7 +42,7 @@ const CrosshairController = Knit.CreateController({
         const color = head ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(127, 127, 0);
         const ch = gui.Box;
         const style = Enum.EasingStyle.Sine;
-        const time = .15;
+        const time = .175;
         const t = new Tweenable(ch.T, time, style),
             b = new Tweenable(ch.B, time, style),
             l = new Tweenable(ch.L, time, style),
@@ -50,8 +50,8 @@ const CrosshairController = Knit.CreateController({
         
         const lines = [t, b, l, r];
         for (const line of lines)
-            line.TweenIn({ BackgroundColor3: color })
-                .Completed.Connect(() => line.TweenOut({ BackgroundColor3: Color3.fromRGB(255, 255, 255) }));
+            line.TweenInOut({ BackgroundColor3: color })
+                .Completed.Connect(() => line.TweenInOut({ BackgroundColor3: Color3.fromRGB(255, 255, 255) }));
     },
 
     FireAnim(): void {
