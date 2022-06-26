@@ -4,7 +4,7 @@ export default class Tweenable<I extends Instance = Instance> {
     public constructor(
         public readonly Instance: I,
         public readonly Time?: number,
-        public readonly Style?: Enum.EasingStyle,
+        public readonly Style: Enum.EasingStyle = Enum.EasingStyle.Linear,
         public readonly DelayTime = 0
     ) {}
 

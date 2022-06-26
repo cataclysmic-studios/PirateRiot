@@ -62,7 +62,7 @@ const CrosshairController = Knit.CreateController({
             l = this.GetTweenPositions(ch.L),
             r = this.GetTweenPositions(ch.R);
 
-        const time = .06;
+        const time = .08;
         const dir = Enum.EasingDirection.InOut, style = Enum.EasingStyle.Sine
         ch.T.TweenPosition(t.Open, dir, style, time, undefined, () => {
             ch.T.TweenPosition(t.Closed, dir, style, time);

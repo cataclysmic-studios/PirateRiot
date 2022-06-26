@@ -69,7 +69,7 @@ const UIController = Knit.CreateController({
 
     ToggleBlur(on: boolean): void {
         const blur = WaitFor<BlurEffect>(Lighting, "Blur");
-        const info = new TweenInfo(.4, Enum.EasingStyle.Sine);
+        const info = new TweenInfo(.5, Enum.EasingStyle.Sine);
         const size = 15;
         if (on) {
             blur.Size = 0;
@@ -89,7 +89,7 @@ const UIController = Knit.CreateController({
         frameOpenCD = true;
         
         const closed = new UDim2(.5, 0, 1.5, 0);
-        const spd = .15;
+        const spd = .25;
         const style = Enum.EasingStyle.Sine
         if (name === "Game") {
             for (const frame of main.GetChildren())
@@ -135,26 +135,33 @@ const UIController = Knit.CreateController({
         const closeCharChooser = new AnimatedButton(charSelect.Close);
         const maleBtn = new AnimatedButton(charSelect.Male);
         const femaleBtn = new AnimatedButton(charSelect.Female);
+        const settings = new AnimatedButton(main.Game.Settings);
         const pop = 3, spd = .2
         addGold.HoverPop(pop, spd);
         addGold.ClickPop(pop, spd);
+        settings.HoverPop(pop, spd);
+        settings.ClickPop(pop, spd);
         chooseChar.HoverPop(pop, spd);
         chooseChar.ClickPop(pop, spd);
         closeCharChooser.HoverPop(pop, spd);
         closeCharChooser.ClickPop(pop, spd);
-        maleBtn.HoverPop(pop, spd);
-        maleBtn.ClickPop(pop, spd);
-        femaleBtn.HoverPop(pop, spd);
-        femaleBtn.ClickPop(pop, spd);
+        maleBtn.HoverPop(pop * 2, spd);
+        maleBtn.ClickPop(pop * 2, spd);
+        femaleBtn.HoverPop(pop * 2, spd);
+        femaleBtn.ClickPop(pop * 2, spd);
     },
 
     HandleButtons(): void {
+        const settings = Knit.GetController("SettingsController");
+        settings.HandleSettingsInterface();
         this.SpinViewportModel(charSelect.Male.Viewport.Male);
         this.SpinViewportModel(charSelect.Female.Viewport.Female);
         charSelect.Male.MouseButton1Click.Connect(() => this.SelectCharacter("Male"));
         charSelect.Female.MouseButton1Click.Connect(() => this.SelectCharacter("Female"));
-        main.CharacterSelect.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
         chooseCharacter.MouseButton1Click.Connect(() => this.OpenFrame("CharacterSelect"));
+        main.CharacterSelect.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
+        main.Game.Settings.MouseButton1Click.Connect(() => this.OpenFrame("Settings"));
+        main.Settings.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
     },
 
     HandleRounds(): void {

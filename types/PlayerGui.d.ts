@@ -4,7 +4,6 @@ interface PlayerGui extends Instance {
             Female: ImageButton & {
                 Viewport: ViewportFrame & {
                     UICorner: UICorner;
-                    Camera: Camera;
                     Female: Model & {
                         LeftLowerArm: MeshPart & {
                             LeftLowerArm: WrapTarget;
@@ -173,6 +172,7 @@ interface PlayerGui extends Instance {
                         ["Body Colors"]: BodyColors;
                         blouse1: Accessory & {
                             Handle: MeshPart & {
+                                TouchInterest: TouchTransmitter;
                                 SurfaceAppearance: SurfaceAppearance;
                                 blouse1: WrapLayer;
                                 AccessoryWeld: Weld;
@@ -274,6 +274,7 @@ interface PlayerGui extends Instance {
                         ["Bandana Hair"]: Accessory & {
                             Handle: Part & {
                                 OriginalSize: Vector3Value;
+                                TouchInterest: TouchTransmitter;
                                 HairAttachment: Attachment;
                                 AccessoryWeld: Weld;
                                 SpecialMesh: SpecialMesh;
@@ -286,7 +287,6 @@ interface PlayerGui extends Instance {
             Male: ImageButton & {
                 Viewport: ViewportFrame & {
                     UICorner: UICorner;
-                    Camera: Camera;
                     Male: Model & {
                         LeftLowerArm: MeshPart & {
                             LeftLowerArm: WrapTarget;
@@ -370,6 +370,7 @@ interface PlayerGui extends Instance {
                         };
                         ["Long Dreads"]: Accessory & {
                             Handle: Part & {
+                                TouchInterest: TouchTransmitter;
                                 HairAttachment: Attachment;
                                 AccessoryWeld: Weld;
                                 SpecialMesh: SpecialMesh;
@@ -430,6 +431,7 @@ interface PlayerGui extends Instance {
                         FancyPants: Accessory & {
                             Handle: MeshPart & {
                                 WaistCenterAttachment: Attachment;
+                                TouchInterest: TouchTransmitter;
                                 SurfaceAppearance: SurfaceAppearance;
                                 AccessoryWeld: Weld;
                                 Pants: WrapLayer;
@@ -475,6 +477,7 @@ interface PlayerGui extends Instance {
                         HairBandanaUrbanSplinterCamo: Accessory & {
                             Handle: Part & {
                                 HatAttachment: Attachment;
+                                TouchInterest: TouchTransmitter;
                                 AccessoryWeld: Weld;
                                 SpecialMesh: SpecialMesh;
                                 AvatarPartScaleType: StringValue;
@@ -486,6 +489,7 @@ interface PlayerGui extends Instance {
                         };
                         CollarShirt: Accessory & {
                             Handle: MeshPart & {
+                                TouchInterest: TouchTransmitter;
                                 Collar: WrapLayer;
                                 SurfaceAppearance: SurfaceAppearance;
                                 AccessoryWeld: Weld;
@@ -589,13 +593,11 @@ interface PlayerGui extends Instance {
                 UIAspectRatioConstraint: UIAspectRatioConstraint;
             };
             UICorner: UICorner;
+            Title: TextLabel;
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
             UIPadding: UIPadding;
         };
         Game: Frame & {
-            Status: Frame & {
-                Status: TextLabel;
-                RemainingTime: TextLabel;
-            };
             ChooseCharacter: TextButton & {
                 UICorner: UICorner;
                 Shadow: TextButton & {
@@ -626,6 +628,60 @@ interface PlayerGui extends Instance {
                     UIGradient: UIGradient;
                 };
             };
+            Status: Frame & {
+                Status: TextLabel;
+                RemainingTime: TextLabel;
+            };
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            Settings: ImageButton & {
+                UICorner: UICorner;
+                Shadow: ImageButton;
+                UIGradient: UIGradient;
+                UIAspectRatioConstraint: UIAspectRatioConstraint;
+            };
         };
-    }    
-}
+        Settings: Frame & {
+            UIPadding: UIPadding;
+            Close: TextButton & {
+                UICorner: UICorner;
+                UIAspectRatioConstraint: UIAspectRatioConstraint;
+            };
+            UICorner: UICorner;
+            Title: TextLabel;
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            List: ScrollingFrame & {
+                UIListLayout: UIListLayout;
+                Shadows: Frame & {
+                    Toggle: Frame & {
+                        UICorner: UICorner;
+                        Button: TextButton;
+                        UIPadding: UIPadding;
+                        Circle: Frame & {
+                            UICorner: UICorner;
+                            Mini: Frame & {
+                                UICorner: UICorner;
+                            };
+                        };
+                    };
+                    Title: TextLabel;
+                    UIPadding: UIPadding;
+                };
+                PostProcessing: Frame & {
+                    Toggle: Frame & {
+                        UICorner: UICorner;
+                        Button: TextButton;
+                        UIPadding: UIPadding;
+                        Circle: Frame & {
+                            UICorner: UICorner;
+                            Mini: Frame & {
+                                UICorner: UICorner;
+                            };
+                        };
+                    };
+                    Title: TextLabel;
+                    UIPadding: UIPadding;
+                };
+            };
+        };
+    }
+}    
