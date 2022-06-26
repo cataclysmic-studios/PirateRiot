@@ -11,6 +11,7 @@ import WaitFor from "shared/Util/WaitFor";
 import Logger from "shared/Logger";
 import UI from "shared/UI";
 import { GameStatus } from "shared/Classes/GameStatus";
+import { CrosshairHandle } from "client/Classes/CrosshairHandle";
 
 declare global {
     interface KnitControllers {
@@ -42,12 +43,13 @@ const UIController = Knit.CreateController({
     },
 
     Update(key: string, value: defined): void {
-        const main = UI.Main();
         switch(key) {
             case "TEST_gold":
             case "gold":
                 main.Game.Gold.Value.Text = tostring(FormatInt(<number>value));
                 break;
+            default:
+                throw Logger.UnhandledCase("Unhandled datastore case");
         }
     },
 
@@ -57,7 +59,7 @@ const UIController = Knit.CreateController({
             case "gold":
                 return 100;
             default:
-                throw Logger.UnhandledCase("Unhandled default value case");
+                throw Logger.UnhandledCase("Unhandled datastore default value case");
         }
     },
 
@@ -139,8 +141,8 @@ const UIController = Knit.CreateController({
         const pop = 3, spd = .2
         addGold.HoverPop(pop, spd);
         addGold.ClickPop(pop, spd);
-        settings.HoverPop(pop, spd);
-        settings.ClickPop(pop, spd);
+        settings.HoverPop(pop * 1.5, spd);
+        settings.ClickPop(pop * 1.5, spd);
         chooseChar.HoverPop(pop, spd);
         chooseChar.ClickPop(pop, spd);
         closeCharChooser.HoverPop(pop, spd);
@@ -169,17 +171,18 @@ const UIController = Knit.CreateController({
         const flintlock = Knit.GetController("FlintlockController");
         const crosshair = Knit.GetController("CrosshairController");
         const movementServer = Knit.GetService("MovementService");
+        let oldCrosshair: CrosshairHandle | undefined
         const toggleOff = () => {
             flintlock.Toggle(false);
-            crosshair.Toggle(false);
+            oldCrosshair = crosshair.Toggle(false);
         }
 
         Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(toggleOff);
         Player.CharacterAdded.Connect(() => {
             if (round.GetStatus() !== GameStatus.InGame) return;
-            toggleOff();
             flintlock.Toggle(true);
             crosshair.Toggle(true);
+            oldCrosshair!.Destroy();
         });
 
         const roundTimer = new Timer();

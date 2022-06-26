@@ -17,9 +17,9 @@ const MovementController = Knit.CreateController({
         const char = Player.Character!;
         const hum = char.FindFirstChildOfClass("Humanoid")!;
         const rollAnim = Replicated.Assets.Animations.Roll.Clone();
-        const track = hum.LoadAnimation(rollAnim);
-        track.Stopped.Connect(() => this.Rolling = false);
-        track.Play();
+        // const track = hum.LoadAnimation(rollAnim);
+        // track.Stopped.Connect(() => this.Rolling = false);
+        // track.Play();
     },
 
     KnitStart() {

@@ -14,7 +14,7 @@ export default class Logger {
     
     public static Debug(...info: defined[]): void {
         if (RunService.IsStudio())
-            this.Log("Debug", info.join("   "));
+            this.Log("Debug", info.map(v => v ?? "nil").join("   "));
     }
 
     public static UnhandledCase(msg: unknown): void {

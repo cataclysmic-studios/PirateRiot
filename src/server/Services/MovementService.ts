@@ -8,6 +8,7 @@ declare global {
     }
 }
 
+const roll_time = 1.5;
 const MovementService = Knit.CreateService({
     Name: "MovementService",
     Active: false,
@@ -30,8 +31,8 @@ const MovementService = Knit.CreateService({
         const mover = new Instance("BodyVelocity");
         const root = char.PrimaryPart!;
         mover.Parent = root;
-        mover.Velocity = root.CFrame.LookVector.mul(1000);
-        Debris.AddItem(mover, 5)
+        mover.Velocity = root.CFrame.LookVector.mul(7000);
+        Debris.AddItem(mover, roll_time)
     },
 
     Toggle(plr: Player, on: boolean): void {

@@ -1,6 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import { Player } from "@rbxts/knit/Knit/KnitClient";
 import { ReplicatedFirst as Replicated, RunService } from "@rbxts/services";
+import { CrosshairHandle } from "client/Classes/CrosshairHandle";
 import UI from "shared/UI";
 import Tweenable from "shared/Util/Tweenable";
 
@@ -10,25 +11,23 @@ declare global {
     }
 }
 
-const crosshair = Replicated.Assets.Crosshair;
-let mouseMove: RBXScriptConnection;
-let gui: typeof crosshair;
-
+let handle: CrosshairHandle;
 const CrosshairController = Knit.CreateController({
     Name: "CrosshairController",
     Enabled: false,
 
-    Toggle(on: boolean): void {
+    Toggle(on: boolean): CrosshairHandle | undefined {
         this.Enabled = on;
         if (on) {
             const ms = Player.GetMouse();
-            gui = Replicated.Assets.Crosshair.Clone();
+            const gui = Replicated.Assets.Crosshair.Clone();
             gui.Parent = UI.Main().Parent;
-            mouseMove = RunService.Stepped.Connect(() => gui.Box.Position = new UDim2(0, ms.X, 0, ms.Y));
+            const mouseMove = RunService.Stepped.Connect(() => gui.Box.Position = new UDim2(0, ms.X, 0, ms.Y));
+            handle = new CrosshairHandle(gui, mouseMove);
         } else {
-            mouseMove?.Disconnect();
-            gui?.Destroy();
+            handle?.Destroy();
         }
+        return handle;
     },
 
     GetTweenPositions(line: Frame): { Closed: UDim2; Open: UDim2 } {
@@ -40,7 +39,7 @@ const CrosshairController = Knit.CreateController({
 
     HitAnim(head: boolean): void {
         const color = head ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(127, 127, 0);
-        const ch = gui.Box;
+        const ch = handle.GUI.Box;
         const style = Enum.EasingStyle.Sine;
         const time = .175;
         const t = new Tweenable(ch.T, time, style),
@@ -56,7 +55,7 @@ const CrosshairController = Knit.CreateController({
 
     FireAnim(): void {
         //todo: tween each part of crosshair diff direction (gross)
-        const ch = gui.Box;
+        const ch = handle.GUI.Box;
         const t = this.GetTweenPositions(ch.T),
             b = this.GetTweenPositions(ch.B),
             l = this.GetTweenPositions(ch.L),
