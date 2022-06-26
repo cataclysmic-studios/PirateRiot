@@ -1,5 +1,5 @@
 import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
-import { ReplicatedFirst as Replicated } from "@rbxts/services";
+import { Players, ReplicatedFirst as Replicated } from "@rbxts/services";
 import Logger from "shared/Logger";
 import WaitFor from "shared/Util/WaitFor";
 import Weld from "shared/Util/Weld";
@@ -42,8 +42,14 @@ const FlintlockService = Knit.CreateService({
     },
 
     HitPlayer(plr: Player, char: Model): void {
+        const score = Knit.GetService("ScoreService");
         const hum = char.FindFirstChildOfClass("Humanoid");
         hum!.TakeDamage(100);
+        score.AddKill(plr);
+
+        const victim = Players.GetPlayerFromCharacter(char);
+        if (victim)
+            score.AddDeath(victim);
     },
 
     Unequip(plr: Player): void {

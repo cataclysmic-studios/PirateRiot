@@ -1,15 +1,16 @@
 import { KnitClient as Knit } from "@rbxts/knit";
+import { Player } from "@rbxts/knit/Knit/KnitClient";
+import { Lighting, StarterGui } from "@rbxts/services";
 import { Data as DataKeys } from "shared/Classes/Data";
 import { Timer, TimerHandle } from "shared/Util/Timer";
-import FormatInt from "shared/Util/FormatInt";
-import UI from "shared/UI";
-import Logger from "shared/Logger";
-import AnimatedButton from "shared/Util/AnimatedButton";
-import { Lighting, ReplicatedFirst as Replicated, StarterGui, Workspace as World } from "@rbxts/services";
-import WaitFor from "shared/Util/WaitFor";
 import { Tween } from "shared/Util/Tween";
+import AnimatedButton from "shared/Util/AnimatedButton";
 import Tweenable from "shared/Util/Tweenable";
-import { Player } from "@rbxts/knit/Knit/KnitClient";
+import FormatInt from "shared/Util/FormatInt";
+import WaitFor from "shared/Util/WaitFor";
+import Logger from "shared/Logger";
+import UI from "shared/UI";
+import { GameStatus } from "shared/Classes/GameStatus";
 
 declare global {
     interface KnitControllers {
@@ -159,6 +160,18 @@ const UIController = Knit.CreateController({
     HandleRounds(): void {
         const round = Knit.GetService("RoundService");
         const flintlock = Knit.GetController("FlintlockController");
+        const crosshair = Knit.GetController("CrosshairController");
+        const movementServer = Knit.GetService("MovementService");
+        Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(() => {
+            flintlock.Toggle(false);
+            crosshair.Toggle(false);
+        });
+        Player.CharacterAdded.Connect(() => {
+            if (round.GetStatus() !== GameStatus.InGame) return;
+            flintlock.Toggle(true);
+            crosshair.Toggle(true);
+        });
+
         const roundTimer = new Timer();
         const setTime = (time: number): string => gameStatus.RemainingTime.Text = this.GetTime(time);
         let roundHandle: TimerHandle
@@ -172,6 +185,7 @@ const UIController = Knit.CreateController({
             roundTimer.Set(roundLength);
             roundHandle = roundTimer.Start();
             flintlock.Toggle(true);
+            movementServer.Toggle(true);
             this.OpenFrame("Game")
             chooseCharacter.Visible = false;
         });
@@ -183,6 +197,7 @@ const UIController = Knit.CreateController({
             roundTimer.Set(intermissionLength);
             intermissionHandle = roundTimer.Start();
             flintlock.Toggle(false);
+            movementServer.Toggle(false);
             chooseCharacter.Visible = true;
         });
     }

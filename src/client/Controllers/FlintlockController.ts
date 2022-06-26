@@ -35,6 +35,27 @@ const FlintlockController = Knit.CreateController({
         }
     },
 
+    CreateHitDustVFX(hitCF: CFrame, hitColor: Color3): void {
+        const [h, s, v] = hitColor.ToHSV();
+        const dust = Replicated.Assets.VFX.Dust.Clone();
+        dust.CFrame = hitCF;
+        dust.Particles.Color = new ColorSequence(Color3.fromHSV(h, s / 1.5, v));
+        dust.Smoke.Color = new ColorSequence(Color3.fromHSV(h, s / 1.25, v));
+        dust.Parent = World.WaitForChild("Ignore");
+
+        const toggleParticles = () => {
+            dust.Particles.Enabled = !dust.Particles.Enabled;
+            dust.Smoke.Enabled = !dust.Smoke.Enabled;
+        }
+
+        task.spawn(() => {
+            toggleParticles();
+            task.wait(.5);
+            toggleParticles();
+            Debris.AddItem(dust, 4.5);
+        });
+    },
+
     CreateMuzzleFlashVFX(muzzle: Part): void {
         for (const p of muzzle.GetDescendants())
             if (p.IsA("ParticleEmitter"))
@@ -49,22 +70,23 @@ const FlintlockController = Knit.CreateController({
         this.CanShoot = false;
         const flintlockServer = Knit.GetService("FlintlockService");
         const crosshair = Knit.GetController("CrosshairController");
+        crosshair.FireAnim();
+
         const char = Player.Character!;
         const flintlock = char.WaitForChild("Flintlock")
         const muzzle = <Part>flintlock.WaitForChild("Muzzle");
-        const params = new RaycastParams();
-        params.FilterDescendantsInstances = [char];
-        params.FilterType = Enum.RaycastFilterType.Blacklist;
+        this.CreateMuzzleFlashVFX(muzzle);
 
         const msLocation = UIS.GetMouseLocation();
         const ray2D = World.CurrentCamera!.ViewportPointToRay(msLocation.X, msLocation.Y);
         const dir = ray2D.Direction.mul(max_dist);
+        const params = new RaycastParams();
+        params.FilterDescendantsInstances = [char, World.WaitForChild("Ignore")];
+        params.FilterType = Enum.RaycastFilterType.Blacklist;
+
         const castRes = World.Raycast(ray2D.Origin, dir, params);
         if (castRes) {
             const part = castRes.Instance;
-            if (RunService.IsStudio())
-                this.CreateDebugTracer(muzzle.Position, castRes.Position)
-
             const char = part.FindFirstAncestorOfClass("Model");
             const hum = char?.FindFirstChildOfClass("Humanoid");
             if (hum) {
@@ -77,15 +99,16 @@ const FlintlockController = Knit.CreateController({
                 this.CreateSound(Replicated.Assets.Sounds.Kill);
                 if (headshot)
                     this.CreateSound(Replicated.Assets.Sounds.Headshot);
+            } else {
+                const rot = CFrame.Angles(0, math.rad(180), math.rad(180));
+                this.CreateHitDustVFX(CFrame.lookAt(castRes.Position, ray2D.Direction).mul(rot), castRes.Instance.Color);
             }
         }
-
-        crosshair.FireAnim();
+        
         flintlockServer.ReloadEnded.Connect(() => this.CanShoot = true);
         flintlockServer.PlayCharAnim("Fire");
         flintlockServer.PlayFlintlockAnim("Fire");
         flintlockServer.CreateGunshotSound();
-        this.CreateMuzzleFlashVFX(muzzle);
     },
 
     CreateSound(soundAsset: Sound): void {
@@ -93,20 +116,6 @@ const FlintlockController = Knit.CreateController({
         sound.Parent = SoundService;
         sound.Play();
         Debris.AddItem(sound, 5);
-    },
-
-    CreateDebugTracer(startPos: Vector3, endPos: Vector3): void {
-        const dist = startPos.sub(endPos).Magnitude;
-        const tracerCF = CFrame.lookAt(startPos, endPos).mul(new CFrame(0, 0, -dist / 2));
-        const tracer = new Instance("Part");
-        tracer.Size = new Vector3(.15, .15, dist);
-        tracer.CFrame = tracerCF;
-        tracer.Anchored = true;
-        tracer.CanCollide = false;
-        tracer.Material = Enum.Material.ForceField;
-        tracer.Color = new Color3(255, 0, 0);
-        tracer.Parent = World;
-        Debris.AddItem(tracer, .2);
     },
 
     KnitStart(): void {

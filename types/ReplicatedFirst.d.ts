@@ -19,6 +19,12 @@ interface ReplicatedFirst extends Instance {
 			FlintlockFire: Animation;
 			something: Animation;
 		};
+		VFX: Folder & {
+			Dust: Part & {
+				Particles: ParticleEmitter;
+				Smoke: ParticleEmitter;
+			};
+		};
 		Characters: Folder & {
 			Male: Model & {
 				LeftLowerArm: MeshPart & {

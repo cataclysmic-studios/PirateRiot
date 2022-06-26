@@ -1,19 +1,15 @@
 /* eslint-disable no-constant-condition */
 import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
 import { Players, ReplicatedFirst as Replicated, RunService, ServerStorage, Workspace as World } from "@rbxts/services";
-import Logger from "shared/Logger";
+import { GameStatus } from "shared/Classes/GameStatus";
 import RandomElement from "shared/Util/RandomElement";
 import WaitFor from "shared/Util/WaitFor";
+import Logger from "shared/Logger";
 
 declare global {
     interface KnitServices {
         RoundService: typeof RoundService;
     }
-}
-
-enum GameStatus {
-    Intermission,
-    InGame
 }
 
 class Mode {
@@ -27,8 +23,11 @@ const modes = [new Mode("FFA", 300)];
 const RoundService = Knit.CreateService({
     Name: "RoundService",
     Status: GameStatus.Intermission,
-
+    
     Client: {
+        GetStatus(): GameStatus {
+            return this.Server.Status;
+        },
         Began: new RemoteSignal<(mapName: string, roundLength: number) => void>(),
         Ended: new RemoteSignal<(intermissionLength: number) => void>()
     },
@@ -51,20 +50,23 @@ const RoundService = Knit.CreateService({
 
     KnitStart(): void {
         Logger.ComponentActive(this.Name);
-        if (RunService.IsStudio())
-            task.wait(10);
-            
+        const score = Knit.GetService("ScoreService")
+
+        task.wait(15);
         task.spawn(() => {
             const lobby = WaitFor<Model>(World, "Lobby");
             const settings = WaitFor<Configuration>(ServerStorage, RunService.IsStudio() ? "TestServerSettings" : "ServerSettings");
             const intermissionTime = <number>settings.GetAttribute("IntermissionTime")
             while (true) {
+                score.ResetScores();
+                this.Status = GameStatus.Intermission;
                 this.Client.Ended.FireAll(intermissionTime);
                 task.wait(intermissionTime);
                 const mode = RandomElement(modes);
                 const map = <Model>RandomElement(Replicated.Maps.GetChildren()).Clone();
                 Logger.Debug("mode:", mode.Name, "map:", map.Name);
-
+                
+                this.Status = GameStatus.InGame;
                 this.Client.Began.FireAll(map.Name, mode.RoundLength);
                 map.Parent = World;
                 this.TeleportPlayers(map);

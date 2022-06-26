@@ -12,15 +12,19 @@ export default class StrictMap<K, V> {
         return this.cache.size();
     }
 
+    public Delete(key: K): boolean {
+        return this.cache.delete(key);
+    }
+
     public Set(key: K, value: V): StrictMap<K, V> {
         this.cache.set(key, value);
         return this;
     }
 
-    public Get(key: K): V | undefined {
+    public Get(key: K): V {
         const value: V | undefined = this.cache.get(key);
         if (!value)
-            Logger.UtilError("StrictMap.Get", `Key "${key}" has no value associated with it.`);
+            throw Logger.UtilError("StrictMap.Get", `Key "${key}" has no value associated with it.`);
         else
             return value;
     }
