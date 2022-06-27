@@ -43,6 +43,7 @@ const FlintlockService = Knit.CreateService({
 
     HitPlayer(plr: Player, char: Model): void {
         const score = Knit.GetService("ScoreService");
+        const data = Knit.GetService("DataManager");
         const hum = char.FindFirstChildOfClass("Humanoid");
         hum!.TakeDamage(100);
         score.AddKill(plr);
@@ -50,6 +51,9 @@ const FlintlockService = Knit.CreateService({
         const victim = Players.GetPlayerFromCharacter(char);
         if (victim)
             score.AddDeath(victim);
+
+        const gold = data.GetRawStore(plr, "gold");
+        gold.Increment(math.random(10, 100));
     },
 
     Unequip(plr: Player): void {
