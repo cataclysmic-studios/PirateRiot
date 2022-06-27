@@ -1,39 +1,38 @@
 import { KnitServer as Knit, RemoteSignal, Signal } from "@rbxts/knit";
 import { RunService } from "@rbxts/services";
-import { Data } from "shared/Classes/Data";
 import DataStore2 from "@rbxts/datastore2";
 import Logger from "shared/Logger";
 
 declare global {
     interface KnitServices {
-        DataManager: typeof DataManager;
+        DataService: typeof DataService;
     }
 }
 
-const DataManager = Knit.CreateService({
-    Name: "DataManager",
+const keys = ["gold"];
+const DataService = Knit.CreateService({
+    Name: "DataService",
 
     Client: {
         DataUpdated: new RemoteSignal<(name: string, value: defined) => void>(),
         Get<T = defined>(plr: Player, name: string, defaultValue?: T): T {
             return this.Server.Get(plr, name, defaultValue);
         },
-
         Set<T = unknown>(plr: Player, name: string, value: T): void {
             this.Server.Set(plr, name, value);
+        },
+        GetKeys(): string[] {
+            return keys;
         }
     },
 
     KnitInit() {
         Logger.ComponentActive(this.Name);
-        DataStore2.Combine("DATA", ...Data);
+        DataStore2.Combine("DATA", ...keys);
     },
 
     GetRawStore<V = unknown>(plr: Player, name: string): DataStore2<V> {
-        if (RunService.IsStudio())
-            return DataStore2<V>("TEST_" + name, plr);
-        else
-            return DataStore2<V>(name, plr);
+        return DataStore2<V>(name, plr);
     },
 
     Get<V = defined>(plr: Player, name: string, defaultValue?: V): V {
@@ -46,17 +45,19 @@ const DataManager = Knit.CreateService({
         store.Set(value);
     },
 
-    Store<V = unknown>(plr: Player, name: string, defaultValue?: V): DataStore2<V> {
-        const store = DataStore2<V>(name, plr);
-        const signal: RemoteSignal = this.Client.DataUpdated;
-        function callRemote(value?: V) {
-            signal.Fire(plr, name, value);
-        }
+    Increment(plr: Player, name: string, amount: number): void {
+        const value = this.Get<number>(plr, name);
+        this.Set(plr, name, value + amount);
+    },
 
-        callRemote(store.Get(defaultValue));
+    Store<V = unknown>(plr: Player, name: string, defaultValue: V): DataStore2<V> {
+        const store = DataStore2<V>(name, plr);
+        const signal = this.Client.DataUpdated;
+        const callRemote = (value: V) => signal.Fire(plr, name, value);
         store.OnUpdate(callRemote);
+        callRemote(store.Get(defaultValue));
         return store;
     }
 });
 
-export = DataManager;
+export = DataService;

@@ -1,8 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import { Player } from "@rbxts/knit/Knit/KnitClient";
 import { Lighting, StarterGui } from "@rbxts/services";
-import { Data as DataKeys } from "shared/Classes/Data";
-import { Timer, TimerHandle } from "shared/Util/Timer";
+import { GameStatus } from "shared/Classes/GameStatus";
 import { Tween } from "shared/Util/Tween";
 import AnimatedButton from "shared/Util/AnimatedButton";
 import Tweenable from "shared/Util/Tweenable";
@@ -10,8 +9,6 @@ import FormatInt from "shared/Util/FormatInt";
 import WaitFor from "shared/Util/WaitFor";
 import Logger from "shared/Logger";
 import UI from "shared/UI";
-import { GameStatus } from "shared/Classes/GameStatus";
-import { CrosshairHandle } from "client/Classes/CrosshairHandle";
 
 declare global {
     interface KnitControllers {
@@ -32,9 +29,9 @@ const UIController = Knit.CreateController({
         Logger.ComponentActive("UIController");
         StarterGui.SetCoreGuiEnabled("All", false);
 
-        const data = Knit.GetService("DataManager");
+        const data = Knit.GetService("DataService");
         data.DataUpdated.Connect((k, v) => this.Update(k, v));
-        for (const k of DataKeys)
+        for (const k of data.GetKeys())
             this.Update(k, <defined>data.Get(k, this.GetDefaultValue(k)));
         
         this.HandleButtonAnims();
@@ -44,7 +41,6 @@ const UIController = Knit.CreateController({
 
     Update(key: string, value: defined): void {
         switch(key) {
-            case "TEST_gold":
             case "gold":
                 main.Game.Gold.Value.Text = tostring(FormatInt(<number>value));
                 break;
@@ -55,7 +51,6 @@ const UIController = Knit.CreateController({
 
     GetDefaultValue(dataKey: string): defined {
         switch(dataKey) {
-            case "TEST_gold":
             case "gold":
                 return 100;
             default:
@@ -91,8 +86,8 @@ const UIController = Knit.CreateController({
         frameOpenCD = true;
         
         const closed = new UDim2(.5, 0, 1.5, 0);
+        const style = Enum.EasingStyle.Sine;
         const spd = .25;
-        const style = Enum.EasingStyle.Sine
         if (name === "Game") {
             for (const frame of main.GetChildren())
                 if (frame.IsA("Frame") && frame.Name !== "Game")
