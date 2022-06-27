@@ -72,7 +72,7 @@ const UIController = Knit.CreateController({
     ToggleBlur(on: boolean): void {
         const blur = WaitFor<BlurEffect>(Lighting, "Blur");
         const info = new TweenInfo(.5, Enum.EasingStyle.Sine);
-        const size = 15;
+        const size = 17;
         if (on) {
             blur.Size = 0;
             blur.Enabled = true;
@@ -189,7 +189,6 @@ const UIController = Knit.CreateController({
             this.OpenFrame("Game")
             chooseCharacter.Visible = false;
         });
-
         round.Ended.Connect(() => {
             main.Game.Status.Status.Text = "Intermission";
             flintlock.Toggle(false);

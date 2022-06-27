@@ -13,13 +13,15 @@ const max_dist = 1000;
 
 const ms = Player.GetMouse();
 const sounds = Replicated.Assets.Sounds;
+const flintlockServer = Knit.GetService("FlintlockService");
+const score = Knit.GetService("ScoreService");
+const serverSettings = Knit.GetService("ServerSettingsService");
 const FlintlockController = Knit.CreateController({
     Name: "FlintlockController",
     Equipped: false,
     CanShoot: true,
 
     Toggle(eq?: boolean): void {
-        const flintlockServer = Knit.GetService("FlintlockService");
         const crosshair = Knit.GetController("CrosshairController");
         this.Equipped = eq ?? !this.Equipped;
         
@@ -36,12 +38,67 @@ const FlintlockController = Knit.CreateController({
         }
     },
 
+    Fire(): void {
+        this.CanShoot = false;
+        const crosshair = Knit.GetController("CrosshairController");
+        crosshair.FireAnim();
+        
+        const char = Player.Character!;
+        const flintlock = char.WaitForChild("Flintlock")
+        const muzzle = <Part>flintlock.WaitForChild("Muzzle");
+        this.CreateMuzzleFlashVFX(muzzle);
+        
+        const msLocation = UIS.GetMouseLocation();
+        const ray2D = World.CurrentCamera!.ViewportPointToRay(msLocation.X, msLocation.Y);
+        const dir = ray2D.Direction.mul(max_dist);
+        const params = new RaycastParams();
+        params.FilterDescendantsInstances = [char, World.WaitForChild("Ignore")];
+        params.FilterType = Enum.RaycastFilterType.Blacklist;
+        
+        const castRes = World.Raycast(ray2D.Origin, dir, params);
+        if (castRes)
+            this.Hit(castRes, ray2D, char);
+        
+        flintlockServer.ReloadEnded.Connect(() => this.CanShoot = true);
+        flintlockServer.PlayCharAnim("Fire");
+        flintlockServer.PlayFlintlockAnim("Fire");
+        flintlockServer.CreateGunshotSound();
+    },
+
+    Hit(castRes: RaycastResult, ray2D: Ray, char: Model): void {
+        const crosshair = Knit.GetController("CrosshairController");
+        const killFeed = Knit.GetController("KillFeedController");
+        const part = castRes.Instance;
+        const victimChar = part.FindFirstAncestorOfClass("Model");
+        const hum = victimChar?.FindFirstChildOfClass("Humanoid");
+        if (victimChar && hum) {
+            if (hum.Health === 0) return;
+            Logger.Debug(Player, "shot", victimChar.Name);
+            const headshot = part.Name === "Head";
+            const dist = victimChar.PrimaryPart!.Position.sub(char.PrimaryPart!.Position).Magnitude;
+            crosshair.HitAnim(headshot);
+            flintlockServer.HitPlayer(victimChar);
+            
+            const scoreMult = serverSettings.GetScoreMultiplier();
+            if (dist > 100)
+                score.AddScore(75 * scoreMult, "Longshot")
+            if (headshot)
+                score.AddScore(50 * scoreMult, "Headshot");
+
+            this.CreateSound(headshot ? sounds.Headshot : sounds.Kill);
+            killFeed.AddKill(char.Name, victimChar.Name, headshot);
+        } else {
+            const hitCF = new CFrame(castRes.Position, ray2D.Direction);
+            this.CreateHitDustVFX(hitCF, castRes.Instance.Color);
+        }
+    },
+
     CreateHitDustVFX(hitCF: CFrame, hitColor: Color3): void {
         const [h, s, v] = hitColor.ToHSV();
         const dust = Replicated.Assets.VFX.Dust.Clone();
         dust.CFrame = hitCF;
-        dust.Particles.Color = new ColorSequence(Color3.fromHSV(h, s / 1.5, v));
-        dust.Smoke.Color = new ColorSequence(Color3.fromHSV(h, s / 1.25, v));
+        dust.Particles.Color = new ColorSequence(Color3.fromHSV(h, s / 1.75, v));
+        dust.Smoke.Color = new ColorSequence(Color3.fromHSV(h, s / 1.5, v));
         dust.Parent = World.WaitForChild("Ignore");
         // if (RunService.IsStudio())
         //     dust.Transparency = 0;
@@ -67,50 +124,6 @@ const FlintlockController = Knit.CreateController({
                     task.wait(.05);
                     p.Enabled = false;
                 });
-    },
-
-    Fire(): void {
-        this.CanShoot = false;
-        const crosshair = Knit.GetController("CrosshairController");
-        crosshair.FireAnim();
-        
-        const char = Player.Character!;
-        const flintlock = char.WaitForChild("Flintlock")
-        const muzzle = <Part>flintlock.WaitForChild("Muzzle");
-        this.CreateMuzzleFlashVFX(muzzle);
-        
-        const msLocation = UIS.GetMouseLocation();
-        const ray2D = World.CurrentCamera!.ViewportPointToRay(msLocation.X, msLocation.Y);
-        const dir = ray2D.Direction.mul(max_dist);
-        const params = new RaycastParams();
-        params.FilterDescendantsInstances = [char, World.WaitForChild("Ignore")];
-        params.FilterType = Enum.RaycastFilterType.Blacklist;
-        
-        const flintlockServer = Knit.GetService("FlintlockService");
-        const castRes = World.Raycast(ray2D.Origin, dir, params);
-        if (castRes) {
-            const part = castRes.Instance;
-            const victimChar = part.FindFirstAncestorOfClass("Model");
-            const hum = victimChar?.FindFirstChildOfClass("Humanoid");
-            if (victimChar && hum) {
-                if (hum.Health === 0) return;
-                Logger.Debug(Player, "shot", victimChar.Name);
-
-                flintlockServer.HitPlayer(victimChar);
-                const headshot = part.Name === "Head";
-                crosshair.HitAnim(headshot);
-                this.CreateSound(headshot ? sounds.Headshot : sounds.Kill);
-            } else {
-                const rot = CFrame.Angles(0, math.rad(180), math.rad(180));
-                const hitCF = new CFrame(castRes.Position, ray2D.Direction);
-                this.CreateHitDustVFX(hitCF, castRes.Instance.Color);
-            }
-        }
-        
-        flintlockServer.ReloadEnded.Connect(() => this.CanShoot = true);
-        flintlockServer.PlayCharAnim("Fire");
-        flintlockServer.PlayFlintlockAnim("Fire");
-        flintlockServer.CreateGunshotSound();
     },
 
     CreateSound(soundAsset: Sound): void {

@@ -1,4 +1,4 @@
-import { KnitServer as Knit } from "@rbxts/knit";
+import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 import StrictMap from "shared/Util/StrictMap";
 import Logger from "shared/Logger";
@@ -14,13 +14,15 @@ interface Score {
     Deaths: number;
     Streak: number;
     KDR: number;
+    Score: number;
 }
 
 const defaultScore = {
     Kills: 0,
     Deaths: 0,
     Streak: 0,
-    KDR: 0
+    KDR: 0,
+    Score: 0
 };
 
 const ScoreService = Knit.CreateService({
@@ -28,12 +30,23 @@ const ScoreService = Knit.CreateService({
     ScoreSet: new StrictMap<Player, Score>(),
 
     Client: {
+        ScoreAdded: new RemoteSignal<(amount: number, action: string) => void>(),
         AddKill(plr: Player): void {
             this.Server.AddKill(plr);
         },
         AddDeath(plr: Player): void {
             this.Server.AddDeath(plr);
+        },
+        AddScore(plr: Player, amount: number, action: string): void {
+            this.Server.AddScore(plr, amount, action);
         }
+    },
+    
+    AddScore(plr: Player, amount: number, action: string): void {
+        const score = this.ScoreSet.Get(plr);
+        score.Score += amount;
+        this.ScoreSet.Set(plr, score);
+        this.Client.ScoreAdded.Fire(plr, amount, action);
     },
 
     AddKill(plr: Player): void {

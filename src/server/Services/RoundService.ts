@@ -91,12 +91,12 @@ const RoundService = Knit.CreateService({
                 Logger.Debug("mode:", mode.Name, "map:", map.Name);
                 
                 map.Parent = World;
-                this.TeleportPlayers(map);
                 this.ToggleSpawns(lobby, false);
                 this.ToggleSpawns(map, true);
                 this.Status = GameStatus.InGame;
                 this.Client.Began.FireAll(map.Name, mode.RoundLength);
                 this.StartRoundTimer(mode.RoundLength)
+                this.TeleportPlayers(map);
                 roundTimer.Finished.Wait();
                 
                 this.ToggleSpawns(lobby, true);

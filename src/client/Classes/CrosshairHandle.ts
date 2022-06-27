@@ -1,6 +1,6 @@
 import { ReplicatedFirst as Replicated } from "@rbxts/services";
 
-type CrosshairGUI = typeof Replicated.Assets.Crosshair;
+type CrosshairGUI = typeof Replicated.Assets.UI.Crosshair;
 export class CrosshairHandle {
     public constructor(
         public readonly GUI: CrosshairGUI, 

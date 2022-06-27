@@ -1,8 +1,102 @@
 interface ReplicatedFirst extends Instance {
 	Maps: Folder & {
-		testie: Model & {
-			Part: Part;
+		Volcano: Model & {
+			["Map info"]: Model & {
+				NoPlace2: Folder & {
+					pickage: Part & {
+						Mesh: SpecialMesh;
+					};
+					Terrain: Model;
+					Bridge: Model & {
+						pickage: Part & {
+							Mesh: SpecialMesh;
+						};
+						["Mine entrance 2"]: Model;
+					};
+					["Straight rail"]: Model & {
+						["Ruby cart"]: Model;
+						["Diamond cart"]: Model;
+						Rail: Model;
+						["Mine entrance 4"]: Model & {
+							["Mine entrance 4"]: Model & {
+								Lantern: Model & {
+									Lamp: Model & {
+										Fire: Model;
+										Glass: Part;
+									};
+								};
+								["Mine entrance 4"]: Model;
+							};
+						};
+						["Mine entrance 5"]: Model & {
+							Lantern: Model & {
+								Lamp: Model & {
+									Fire: Model;
+									Glass: Part;
+								};
+							};
+							["Mine entrance 5"]: Model;
+						};
+						["Emerald cart"]: Model;
+						["Gold cart"]: Model;
+					};
+					["track with Rumba"]: Model & {
+						Union: UnionOperation;
+						cave: Model;
+						pickaxe: Part & {
+							Mesh: SpecialMesh;
+						};
+						["Mine entrance 1"]: Model;
+					};
+					["Mine entrance 6"]: Model & {
+						["Mine entrance 4"]: Model & {
+							Lantern: Model & {
+								Lamp: Model & {
+									Fire: Model;
+									Glass: Part;
+								};
+							};
+							["Mine entrance 4"]: Model;
+						};
+					};
+					Baseplate: MeshPart;
+					["EASTER EGG!!"]: Part & {
+						SurfaceGui: SurfaceGui & {
+							TextLabel: TextLabel;
+						};
+					};
+					["Mine entrance 3"]: Model;
+					["fog or something"]: Model & {
+						Part: Part;
+					};
+					Entrance: Model & {
+						fog: Model;
+					};
+					["Mine exit"]: Model & {
+						Cliff: MeshPart;
+						Baseplate: MeshPart;
+					};
+				};
+				Parts: Model & {
+					["Cliff Spots"]: Model & {
+						Cliff: Model & {
+							Cliff: Model & {
+								MeshPart: MeshPart;
+							};
+						};
+					};
+				};
+			};
+			pickage: Part & {
+				Mesh: SpecialMesh;
+			};
 			Spawns: Folder;
+			Part: Part;
+			Lava: Part & {
+				Lava: ParticleEmitter;
+				Script: Script;
+			};
+			["groud with hole"]: Model;
 		};
 	};
 	Assets: Folder & {
@@ -12,18 +106,32 @@ interface ReplicatedFirst extends Instance {
 			Kill: Sound;
 			Reload: Sound;
 		};
-		Animations: Folder & {
-			FlintlockIdle: Animation;
-			CharFire: Animation;
-			CharIdle: Animation;
-			FlintlockFire: Animation;
-			Roll: Animation;
-			something: Animation;
-		};
-		VFX: Folder & {
-			Dust: Part & {
-				Particles: ParticleEmitter;
-				Smoke: ParticleEmitter;
+		UI: Folder & {
+			KillFeedObject: Frame & {
+				Victim: TextLabel;
+				Killer: TextLabel;
+				KillType: ImageLabel & {
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+				};
+			};
+			KillNotif: TextLabel;
+			Crosshair: ScreenGui & {
+				Box: Frame & {
+					UIScale: UIScale;
+					B: Frame & {
+						UIGradient: UIGradient;
+					};
+					R: Frame & {
+						UIGradient: UIGradient;
+					};
+					T: Frame & {
+						UIGradient: UIGradient;
+					};
+					UIAspectRatioConstraint: UIAspectRatioConstraint;
+					L: Frame & {
+						UIGradient: UIGradient;
+					};
+				};
 			};
 		};
 		Characters: Folder & {
@@ -110,6 +218,7 @@ interface ReplicatedFirst extends Instance {
 				};
 				["Long Dreads"]: Accessory & {
 					Handle: Part & {
+						TouchInterest: TouchTransmitter;
 						HairAttachment: Attachment;
 						AccessoryWeld: Weld;
 						SpecialMesh: SpecialMesh;
@@ -169,10 +278,11 @@ interface ReplicatedFirst extends Instance {
 				};
 				FancyPants: Accessory & {
 					Handle: MeshPart & {
-						Pants: WrapLayer;
 						WaistCenterAttachment: Attachment;
-						AccessoryWeld: Weld;
+						TouchInterest: TouchTransmitter;
 						SurfaceAppearance: SurfaceAppearance;
+						AccessoryWeld: Weld;
+						Pants: WrapLayer;
 					};
 					ThumbnailConfiguration: Configuration & {
 						ThumbnailCameraValue: CFrameValue;
@@ -214,8 +324,9 @@ interface ReplicatedFirst extends Instance {
 				};
 				HairBandanaUrbanSplinterCamo: Accessory & {
 					Handle: Part & {
-						AccessoryWeld: Weld;
 						HatAttachment: Attachment;
+						TouchInterest: TouchTransmitter;
+						AccessoryWeld: Weld;
 						SpecialMesh: SpecialMesh;
 						AvatarPartScaleType: StringValue;
 					};
@@ -226,10 +337,11 @@ interface ReplicatedFirst extends Instance {
 				};
 				CollarShirt: Accessory & {
 					Handle: MeshPart & {
-						SurfaceAppearance: SurfaceAppearance;
-						BodyFrontAttachment: Attachment;
-						AccessoryWeld: Weld;
+						TouchInterest: TouchTransmitter;
 						Collar: WrapLayer;
+						SurfaceAppearance: SurfaceAppearance;
+						AccessoryWeld: Weld;
+						BodyFrontAttachment: Attachment;
 					};
 				};
 				LeftUpperArm: MeshPart & {
@@ -299,14 +411,14 @@ interface ReplicatedFirst extends Instance {
 					AvatarPartScaleType: StringValue;
 				};
 				Humanoid: Humanoid & {
-					BodyDepthScale: NumberValue;
-					BodyHeightScale: NumberValue;
 					BodyTypeScale: NumberValue;
+					HumanoidDescription: HumanoidDescription;
+					HeadScale: NumberValue;
 					BodyProportionScale: NumberValue;
 					Animator: Animator;
 					BodyWidthScale: NumberValue;
-					HumanoidDescription: HumanoidDescription;
-					HeadScale: NumberValue;
+					BodyDepthScale: NumberValue;
+					BodyHeightScale: NumberValue;
 				};
 				RightUpperLeg: MeshPart & {
 					OriginalSize: Vector3Value;
@@ -490,10 +602,11 @@ interface ReplicatedFirst extends Instance {
 				["Body Colors"]: BodyColors;
 				blouse1: Accessory & {
 					Handle: MeshPart & {
-						BodyFrontAttachment: Attachment;
+						TouchInterest: TouchTransmitter;
+						SurfaceAppearance: SurfaceAppearance;
 						blouse1: WrapLayer;
 						AccessoryWeld: Weld;
-						SurfaceAppearance: SurfaceAppearance;
+						BodyFrontAttachment: Attachment;
 					};
 					ThumbnailConfiguration: Configuration & {
 						ThumbnailCameraValue: CFrameValue;
@@ -567,14 +680,14 @@ interface ReplicatedFirst extends Instance {
 					AvatarPartScaleType: StringValue;
 				};
 				Humanoid: Humanoid & {
-					BodyDepthScale: NumberValue;
-					BodyHeightScale: NumberValue;
 					BodyTypeScale: NumberValue;
+					HumanoidDescription: HumanoidDescription;
+					HeadScale: NumberValue;
 					BodyProportionScale: NumberValue;
 					Animator: Animator;
 					BodyWidthScale: NumberValue;
-					HumanoidDescription: HumanoidDescription;
-					HeadScale: NumberValue;
+					BodyDepthScale: NumberValue;
+					BodyHeightScale: NumberValue;
 				};
 				RightUpperLeg: MeshPart & {
 					OriginalSize: Vector3Value;
@@ -591,6 +704,7 @@ interface ReplicatedFirst extends Instance {
 				["Bandana Hair"]: Accessory & {
 					Handle: Part & {
 						OriginalSize: Vector3Value;
+						TouchInterest: TouchTransmitter;
 						HairAttachment: Attachment;
 						AccessoryWeld: Weld;
 						SpecialMesh: SpecialMesh;
@@ -599,22 +713,18 @@ interface ReplicatedFirst extends Instance {
 				};
 			};
 		};
-		Crosshair: ScreenGui & {
-			Box: Frame & {
-				UIScale: UIScale;
-				B: Frame & {
-					UIGradient: UIGradient;
-				};
-				R: Frame & {
-					UIGradient: UIGradient;
-				};
-				T: Frame & {
-					UIGradient: UIGradient;
-				};
-				UIAspectRatioConstraint: UIAspectRatioConstraint;
-				L: Frame & {
-					UIGradient: UIGradient;
-				};
+		Animations: Folder & {
+			FlintlockIdle: Animation;
+			CharFire: Animation;
+			CharIdle: Animation;
+			Roll: Animation;
+			FlintlockFire: Animation;
+			something: Animation;
+		};
+		VFX: Folder & {
+			Dust: Part & {
+				Particles: ParticleEmitter;
+				Smoke: ParticleEmitter;
 			};
 		};
 		Flintlock: Model & {
@@ -624,9 +734,7 @@ interface ReplicatedFirst extends Instance {
 			Trigger: MeshPart & {
 				SurfaceAppearance: SurfaceAppearance;
 			};
-			Muzzle: Part & {
-				Attachment: Attachment;
-			};
+			Muzzle: Part;
 			Base2: MeshPart & {
 				SurfaceAppearance: SurfaceAppearance;
 			};

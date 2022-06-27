@@ -605,6 +605,9 @@ interface PlayerGui extends Instance {
                 };
                 UIGradient: UIGradient;
             };
+            KillFeed: Frame & {
+                UIListLayout: UIListLayout;
+            };
             UIPadding: UIPadding;
             Gold: Frame & {
                 UIAspectRatioConstraint: UIAspectRatioConstraint;
@@ -631,6 +634,9 @@ interface PlayerGui extends Instance {
             Status: Frame & {
                 Status: TextLabel;
                 RemainingTime: TextLabel;
+            };
+            Notifier: Frame & {
+                UIListLayout: UIListLayout;
             };
             UIAspectRatioConstraint: UIAspectRatioConstraint;
             Settings: ImageButton & {

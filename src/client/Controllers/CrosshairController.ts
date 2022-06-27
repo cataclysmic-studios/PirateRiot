@@ -21,7 +21,7 @@ const CrosshairController = Knit.CreateController({
         this.Enabled = on;
         if (on) {
             const ms = Player.GetMouse();
-            const gui = Replicated.Assets.Crosshair.Clone();
+            const gui = Replicated.Assets.UI.Crosshair.Clone();
             gui.Parent = pgui;
             const mouseMove = RunService.Stepped.Connect(() => {
                 if (!gui) return;
@@ -48,7 +48,7 @@ const CrosshairController = Knit.CreateController({
         const color = head ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(127, 127, 0);
         const ch = handle.GUI.Box;
         const style = Enum.EasingStyle.Sine;
-        const time = .175;
+        const time = .125;
         const t = new Tweenable(ch.T, time, style),
             b = new Tweenable(ch.B, time, style),
             l = new Tweenable(ch.L, time, style),
@@ -56,8 +56,8 @@ const CrosshairController = Knit.CreateController({
         
         const lines = [t, b, l, r];
         for (const line of lines)
-            line.TweenInOut({ BackgroundColor3: color })
-                .Completed.Connect(() => line.TweenInOut({ BackgroundColor3: Color3.fromRGB(255, 255, 255) }));
+            line.TweenIn({ BackgroundColor3: color })
+                .Completed.Connect(() => line.TweenIn({ BackgroundColor3: Color3.fromRGB(255, 255, 255) }));
     },
 
     FireAnim(): void {
