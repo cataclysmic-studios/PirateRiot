@@ -53,7 +53,7 @@ const FlintlockController = Knit.CreateController({
 
         task.spawn(() => {
             toggleParticles();
-            task.wait(.5);
+            task.wait(.25);
             toggleParticles();
             Debris.AddItem(dust, 4.5);
         });

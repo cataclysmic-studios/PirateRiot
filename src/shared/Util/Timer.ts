@@ -12,6 +12,7 @@ export class Timer {
 
     public readonly Count = new Signal<(timeRemaining: number) => void>();
     public readonly OnSet = new Signal<(time: number) => void>();
+    public readonly Finished = new Signal<() => void>();
 
     public constructor(
         private readonly increment = 1
@@ -31,6 +32,7 @@ export class Timer {
                 this.timeRemaining -= this.increment;
                 this.Count.Fire(this.timeRemaining);
             }
+            this.Finished.Fire();
         });
         return handle;
     }

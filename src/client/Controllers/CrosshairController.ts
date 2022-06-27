@@ -12,6 +12,7 @@ declare global {
 }
 
 let handle: CrosshairHandle;
+const pgui = UI.Main().Parent;
 const CrosshairController = Knit.CreateController({
     Name: "CrosshairController",
     Enabled: false,
@@ -21,11 +22,17 @@ const CrosshairController = Knit.CreateController({
         if (on) {
             const ms = Player.GetMouse();
             const gui = Replicated.Assets.Crosshair.Clone();
-            gui.Parent = UI.Main().Parent;
-            const mouseMove = RunService.Stepped.Connect(() => gui.Box.Position = new UDim2(0, ms.X, 0, ms.Y));
+            gui.Parent = pgui;
+            const mouseMove = RunService.Stepped.Connect(() => {
+                if (!gui) return;
+                gui.Box.Position = new UDim2(0, ms.X, 0, ms.Y);
+            });
+            
             handle = new CrosshairHandle(gui, mouseMove);
         } else {
             handle?.Destroy();
+            const extra = pgui?.FindFirstChild("Crosshair");
+            extra?.Destroy();
         }
         return handle;
     },

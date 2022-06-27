@@ -1,5 +1,5 @@
 import { KnitServer as Knit } from "@rbxts/knit";
-import { Debris } from "@rbxts/services";
+import { ReplicatedFirst as Replicated} from "@rbxts/services";
 import Logger from "shared/Logger";
 
 declare global {
@@ -8,9 +8,10 @@ declare global {
     }
 }
 
-const roll_time = 1.5;
+const rollAnim = Replicated.Assets.Animations.Roll;
 const MovementService = Knit.CreateService({
     Name: "MovementService",
+    Rolling: false,
     Active: false,
 
     Client: {
@@ -25,18 +26,42 @@ const MovementService = Knit.CreateService({
         }
     },
 
+    KnitStart(): void {
+        Logger.ComponentActive(this.Name);
+    },
+
     Roll(plr: Player): void {
+        if (this.Rolling) return;
+        this.Rolling = true;
+
         Logger.Debug(plr, "rolled");
         const char = plr.Character!;
-        const mover = new Instance("BodyVelocity");
         const root = char.PrimaryPart!;
-        mover.Parent = root;
-        mover.Velocity = root.CFrame.LookVector.mul(7000);
-        Debris.AddItem(mover, roll_time)
+        const hum = char.FindFirstChildOfClass("Humanoid")!;
+        const anim = rollAnim.Clone();
+        const track = hum.LoadAnimation(anim);
+
+        track.Stopped.Connect(() => {
+            this.Rolling = false;
+        });
+        track.AdjustSpeed(1.25);
+        track.Play();
+        task.spawn(() => {
+            task.wait(.2);
+            const mover = new Instance("BodyVelocity", root);
+            mover.MaxForce = new Vector3(1, 0, 1).mul(30000);
+            mover.Velocity = root.CFrame.LookVector.mul(35);
+            for (let i = 1; i <= 6; i++) {
+                task.wait(.07);
+                mover.Velocity = mover.Velocity.mul(.85);
+            }
+            mover.Destroy();
+        });
     },
 
     Toggle(plr: Player, on: boolean): void {
         this.Active = on;
+        this.Rolling = false;
     }
 });
 

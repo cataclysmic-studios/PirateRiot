@@ -171,45 +171,29 @@ const UIController = Knit.CreateController({
         const flintlock = Knit.GetController("FlintlockController");
         const crosshair = Knit.GetController("CrosshairController");
         const movementServer = Knit.GetService("MovementService");
-        let oldCrosshair: CrosshairHandle | undefined
-        const toggleOff = () => {
-            flintlock.Toggle(false);
-            oldCrosshair = crosshair.Toggle(false);
-        }
 
-        Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(toggleOff);
+        Player.Character!.FindFirstChildOfClass("Humanoid")!.Died.Connect(() => flintlock.Toggle(false));
         Player.CharacterAdded.Connect(() => {
             if (round.GetStatus() !== GameStatus.InGame) return;
+            crosshair.Toggle(false);
             flintlock.Toggle(true);
-            crosshair.Toggle(true);
-            oldCrosshair!.Destroy();
         });
 
-        const roundTimer = new Timer();
         const setTime = (time: number): string => gameStatus.RemainingTime.Text = this.GetTime(time);
-        let roundHandle: TimerHandle
-        let intermissionHandle: TimerHandle
-
-        roundTimer.OnSet.Connect(setTime);
-        roundTimer.Count.Connect(setTime);
-        round.Began.Connect((_, roundLength: number) => {
+        round.OnTimerSet.Connect(setTime);
+        round.OnTimerCount.Connect(setTime);
+        round.Began.Connect(mapName => {
             main.Game.Status.Status.Text = "In Game";
-            roundTimer.Stop(intermissionHandle);
-            roundTimer.Set(roundLength);
-            roundHandle = roundTimer.Start();
             flintlock.Toggle(true);
             movementServer.Toggle(true);
             this.OpenFrame("Game")
             chooseCharacter.Visible = false;
         });
-        round.Ended.Connect((intermissionLength: number) => {
+
+        round.Ended.Connect(() => {
             main.Game.Status.Status.Text = "Intermission";
-            if (roundHandle)
-                roundTimer.Stop(roundHandle);
-                
-            roundTimer.Set(intermissionLength);
-            intermissionHandle = roundTimer.Start();
             flintlock.Toggle(false);
+            crosshair.Toggle(false);
             movementServer.Toggle(false);
             chooseCharacter.Visible = true;
         });
