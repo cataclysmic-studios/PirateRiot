@@ -1,5 +1,18 @@
-interface PlayerGui extends Instance {
+interface PlayerGui extends Instance { 
     Main: ScreenGui & {
+        Leaderboard: Frame & {
+            KDR: TextLabel;
+            PlayerList: ScrollingFrame & {
+                UIListLayout: UIListLayout;
+            };
+            UIPadding: UIPadding;
+            Deaths: TextLabel;
+            UICorner: UICorner;
+            Kills: TextLabel;
+            Line: Frame & {
+                UICorner: UICorner;
+            };
+        };
         CharacterSelect: Frame & {
             Female: ImageButton & {
                 Viewport: ViewportFrame & {

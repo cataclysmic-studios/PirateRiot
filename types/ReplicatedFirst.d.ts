@@ -107,6 +107,12 @@ interface ReplicatedFirst extends Instance {
 			Reload: Sound;
 		};
 		UI: Folder & {
+			LeaderboardPlayer: Frame & {
+				Name: TextLabel;
+				Kills: TextLabel;
+				KDR: TextLabel;
+				Deaths: TextLabel;
+			};
 			KillFeedObject: Frame & {
 				Victim: TextLabel;
 				Killer: TextLabel;
@@ -133,7 +139,7 @@ interface ReplicatedFirst extends Instance {
 					};
 				};
 			};
-		};
+		};		
 		Characters: Folder & {
 			Male: Model & {
 				LeftLowerArm: MeshPart & {

@@ -12,8 +12,9 @@ const MovementController = Knit.CreateController({
 
     KnitStart() {
         const movementServer = Knit.GetService("MovementService");
-        UIS.InputBegan.Connect(({ KeyCode: key }) => {
+        UIS.InputBegan.Connect(({ KeyCode: key }, processed) => {
             if (!movementServer.IsActive()) return;
+            if (processed) return;
             if (key === Enum.KeyCode.R)
                 movementServer.Roll();
         });

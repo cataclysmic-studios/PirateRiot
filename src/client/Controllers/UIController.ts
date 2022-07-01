@@ -1,6 +1,6 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import { Player } from "@rbxts/knit/Knit/KnitClient";
-import { Lighting, StarterGui } from "@rbxts/services";
+import { Lighting, Players, ReplicatedFirst as Replicated, StarterGui, UserInputService as UIS } from "@rbxts/services";
 import { GameStatus } from "shared/Classes/GameStatus";
 import { Tween } from "shared/Util/Tween";
 import AnimatedButton from "shared/Util/AnimatedButton";
@@ -9,6 +9,7 @@ import FormatInt from "shared/Util/FormatInt";
 import WaitFor from "shared/Util/WaitFor";
 import Logger from "shared/Logger";
 import UI from "shared/UI";
+import Find from "shared/Util/Find";
 
 declare global {
     interface KnitControllers {
@@ -37,6 +38,7 @@ const UIController = Knit.CreateController({
         this.HandleButtonAnims();
         this.HandleButtons();
         this.HandleRounds();
+        this.HandleLeaderboard();
     },
 
     Update(key: string, value: defined): void {
@@ -66,8 +68,8 @@ const UIController = Knit.CreateController({
 
     ToggleBlur(on: boolean): void {
         const blur = WaitFor<BlurEffect>(Lighting, "Blur");
-        const info = new TweenInfo(.5, Enum.EasingStyle.Sine);
-        const size = 17;
+        const info = new TweenInfo(.4, Enum.EasingStyle.Sine);
+        const size = 18;
         if (on) {
             blur.Size = 0;
             blur.Enabled = true;
@@ -87,7 +89,7 @@ const UIController = Knit.CreateController({
         
         const closed = new UDim2(.5, 0, 1.5, 0);
         const style = Enum.EasingStyle.Sine;
-        const spd = .25;
+        const spd = .2;
         if (name === "Game") {
             for (const frame of main.GetChildren())
                 if (frame.IsA("Frame") && frame.Name !== "Game")
@@ -126,6 +128,28 @@ const UIController = Knit.CreateController({
         character.Change(gender);
     },
 
+    HandleLeaderboard(): void {
+        const score = Knit.GetService("ScoreService");
+        const list = main.Leaderboard.PlayerList;
+        const lbPlayer = Replicated.Assets.UI.LeaderboardPlayer;
+        score.Changed.Connect(() => {
+            for (const plr of Players.GetPlayers()) {
+                let plrFrame = Find<typeof lbPlayer | undefined>(list, plr.Name);
+                if (!plrFrame) {
+                    plrFrame = lbPlayer.Clone();
+                    plrFrame.Parent = list;
+                }
+
+                const vals = score.GetScores(plr);
+                plrFrame.Name.Text = plr.Name;
+                plrFrame.Kills.Text = tostring(vals.Kills);
+                plrFrame.Deaths.Text = tostring(vals.Deaths);
+                plrFrame.KDR.Text = tostring(vals.KDR).sub(0, 4);
+            }
+            
+        });
+    },
+
     HandleButtonAnims(): void {
         const addGold = new AnimatedButton(gold.Add);
         const chooseChar = new AnimatedButton(chooseCharacter);
@@ -159,6 +183,14 @@ const UIController = Knit.CreateController({
         main.CharacterSelect.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
         main.Game.Settings.MouseButton1Click.Connect(() => this.OpenFrame("Settings"));
         main.Settings.Close.MouseButton1Click.Connect(() => this.OpenFrame("Game"));
+        UIS.InputBegan.Connect(({ KeyCode: key }, processed) => {
+            if (key === Enum.KeyCode.Tab && !processed)
+                this.OpenFrame("Leaderboard");
+        });
+        UIS.InputEnded.Connect(({ KeyCode: key }, processed) => {
+            if (key === Enum.KeyCode.Tab && !processed)
+                this.OpenFrame("Game");
+        });
     },
 
     HandleRounds(): void {

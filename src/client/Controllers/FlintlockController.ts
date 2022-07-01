@@ -130,7 +130,7 @@ const FlintlockController = Knit.CreateController({
 
     CreateMuzzleFlashVFX(muzzle: Part): void {
         for (const p of muzzle.GetDescendants())
-            if (p.IsA("ParticleEmitter"))
+            if (p.IsA("ParticleEmitter") || p.IsA("PointLight"))
                 task.spawn(() => {
                     p.Enabled = true;
                     task.wait(.05);

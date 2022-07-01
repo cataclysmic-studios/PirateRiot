@@ -2,7 +2,6 @@ import Logger from "shared/Logger";
 
 export default class StrictMap<K, V> {
     private readonly cache: Map<K, V>;
-    private idx = 0;
 
     public constructor(base: ReadonlyArray<readonly [K, V]> = []) {
         this.cache = new Map<K, V>(base);
