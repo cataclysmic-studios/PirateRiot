@@ -141,9 +141,10 @@ const UIController = Knit.CreateController({
         });
         score.Changed.Connect(() => {
             for (const plr of Players.GetPlayers()) {
-                let plrFrame = Find<typeof lbPlayer | undefined>(list, plr.Name);
+                let plrFrame = Find<typeof lbPlayer>(list, plr.Name);
                 if (!plrFrame) {
                     plrFrame = lbPlayer.Clone();
+                    plrFrame.Name = plr.Name;
                     plrFrame.Parent = list;
                 }
 

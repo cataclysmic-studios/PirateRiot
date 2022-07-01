@@ -1,6 +1,6 @@
 import Logger from "shared/Logger";
 
-export default function Find<T extends Instance | undefined>(instance: Instance, instanceName: string): T {
+export default function Find<T extends Instance>(instance: Instance, instanceName: string): T | undefined {
     if (!instance)
         Logger.UtilError("Find", "Instance is undefined");
     if (!instanceName)
