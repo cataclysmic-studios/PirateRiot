@@ -657,6 +657,21 @@ interface PlayerGui extends Instance {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
             List: ScrollingFrame & {
                 UIListLayout: UIListLayout;
+                Chat: Frame & {
+                    Toggle: Frame & {
+                        UICorner: UICorner;
+                        Button: TextButton;
+                        UIPadding: UIPadding;
+                        Circle: Frame & {
+                            UICorner: UICorner;
+                            Mini: Frame & {
+                                UICorner: UICorner;
+                            };
+                        };
+                    };
+                    Title: TextLabel;
+                    UIPadding: UIPadding;
+                };
                 Shadows: Frame & {
                     Toggle: Frame & {
                         UICorner: UICorner;

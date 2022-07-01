@@ -17,7 +17,7 @@ const KillFeedController = Knit.CreateController({
         const obj = Replicated.Assets.UI.KillFeedObject.Clone();
         obj.Killer.Text = killer;
         obj.Victim.Text = victim;
-        obj.KillType.Image = headshot ? "" : ""; //add images
+        obj.KillType.Image = "rbxassetid://" + (headshot ? "10057158524" : "10057157466");
         obj.Parent = feed;
         Debris.AddItem(obj, 10);
     }

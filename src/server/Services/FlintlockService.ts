@@ -1,5 +1,5 @@
 import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
-import { Players, ReplicatedFirst as Replicated } from "@rbxts/services";
+import { Debris, Players, ReplicatedFirst as Replicated } from "@rbxts/services";
 import Logger from "shared/Logger";
 import WaitFor from "shared/Util/WaitFor";
 import Weld from "shared/Util/Weld";
@@ -116,18 +116,15 @@ const FlintlockService = Knit.CreateService({
     },
 
     CreateGunshotSound(plr: Player): void {
-        const char = plr.Character;
+        const char = plr.Character!;
         const fireSound = Replicated.Assets.Sounds.Shoot.Clone();
         const reloadSound = Replicated.Assets.Sounds.Reload.Clone();
-        fireSound.Parent = char
-        reloadSound.Parent = char
+        fireSound.Parent = char.PrimaryPart!;
+        reloadSound.Parent = char.PrimaryPart!;
         fireSound.Stopped.Connect(() => reloadSound.Play());
-        reloadSound.Stopped.Connect(() => {
-            fireSound.Destroy();
-            reloadSound.Destroy();
-        });
-
         fireSound.Play();
+        Debris.AddItem(fireSound, 7);
+        Debris.AddItem(reloadSound, 7);
     }
 });
 

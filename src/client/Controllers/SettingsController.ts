@@ -4,6 +4,7 @@ import Logger from "shared/Logger";
 import UI from "shared/UI";
 import AnimatedButton from "shared/Util/AnimatedButton";
 import Tweenable from "shared/Util/Tweenable";
+import WaitFor from "shared/Util/WaitFor";
 
 declare global {
     interface KnitControllers {
@@ -12,6 +13,7 @@ declare global {
 }
 
 const main = UI.Main();
+const chatUI = WaitFor<ScreenGui>(main.Parent!, "ChatGui");
 const list = main.Settings.List;
 type ToggleSwitch = typeof list.Shadows.Toggle;
 
@@ -19,12 +21,14 @@ const SettingsController = Knit.CreateController({
     Name: "SettingsController",
     State: {
         Shadows: true,
-        PostProcessing: true
+        PostProcessing: true,
+        Chat: true,
     },
     
     Update(): void {
         this.AnimateToggleSwitch(list.Shadows.Toggle, this.State.Shadows);
         this.AnimateToggleSwitch(list.PostProcessing.Toggle, this.State.PostProcessing);
+        this.AnimateToggleSwitch(list.Chat.Toggle, this.State.Chat);
     },
 
     AnimateToggleSwitch(toggleSwitch: ToggleSwitch, on: boolean): void {
@@ -55,6 +59,13 @@ const SettingsController = Knit.CreateController({
 
         const shadowsSwitch = list.Shadows.Toggle;
         const ppfxSwitch = list.PostProcessing.Toggle;
+        const chatSwitch = list.Chat.Toggle;
+        chatSwitch.Button.MouseButton1Click.Connect(() => {
+            this.State.Chat = !this.State.Chat;
+            this.Update();
+            chatUI.Enabled = this.State.Chat;
+
+        })
         shadowsSwitch.Button.MouseButton1Click.Connect(() => {
             this.State.Shadows = !this.State.Shadows;
             this.Update();

@@ -25,6 +25,9 @@ const roundTimer = new Timer();
 let roundHandle: TimerHandle;
 let intermissionHandle: TimerHandle;
 
+let map: Model;
+let mode: Mode;
+
 const RoundService = Knit.CreateService({
     Name: "RoundService",
     Status: GameStatus.Intermission,
@@ -36,6 +39,12 @@ const RoundService = Knit.CreateService({
         OnTimerCount: new RemoteSignal<(timeRemaining: number) => void>(),
         GetStatus(): GameStatus {
             return this.Server.Status;
+        },
+        GetMap(): Model | undefined {
+            return map;
+        },
+        GetMode(): Mode | undefined {
+            return mode;
         }
     },
 
@@ -86,8 +95,8 @@ const RoundService = Knit.CreateService({
                 this.StartIntermissionTimer(intermissionTime)
                 roundTimer.Finished.Wait();
 
-                const mode = RandomElement(modes);
-                const map = <Model>RandomElement(Replicated.Maps.GetChildren()).Clone();
+                mode = RandomElement(modes);
+                map = <Model>RandomElement(Replicated.Maps.GetChildren()).Clone();
                 Logger.Debug("mode:", mode.Name, "map:", map.Name);
                 
                 map.Parent = World;

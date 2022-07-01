@@ -37,6 +37,18 @@ const FlintlockController = Knit.CreateController({
             flintlockServer.Unequip();
         }
     },
+     
+    FilterTransparentPartsForRaycast(filterList: Instance[]): Instance[] {
+        const round = Knit.GetService("RoundService");
+        const currentMap = round.GetMap();
+        if (!currentMap) return filterList;
+
+        for (const ch of currentMap.GetChildren())
+            if (ch.IsA("BasePart") && ch.Transparency === 1)
+                filterList.push(ch);
+
+        return filterList;
+    },
 
     Fire(): void {
         this.CanShoot = false;
@@ -52,7 +64,7 @@ const FlintlockController = Knit.CreateController({
         const ray2D = World.CurrentCamera!.ViewportPointToRay(msLocation.X, msLocation.Y);
         const dir = ray2D.Direction.mul(max_dist);
         const params = new RaycastParams();
-        params.FilterDescendantsInstances = [char, World.WaitForChild("Ignore")];
+        params.FilterDescendantsInstances = this.FilterTransparentPartsForRaycast([char, World.WaitForChild("Ignore")]);
         params.FilterType = Enum.RaycastFilterType.Blacklist;
         
         const castRes = World.Raycast(ray2D.Origin, dir, params);
