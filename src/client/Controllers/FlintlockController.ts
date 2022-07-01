@@ -97,7 +97,10 @@ const FlintlockController = Knit.CreateController({
             if (headshot)
                 score.AddScore(50 * scoreMult, "Headshot");
 
-            this.CreateSound(headshot ? sounds.Headshot : sounds.Kill);
+            if (headshot)
+                this.CreateSound(sounds.Headshot);
+                
+            this.CreateSound(sounds.Kill);
             killFeed.AddKill(char.Name, victimChar.Name, headshot);
         } else {
             const hitCF = new CFrame(castRes.Position, ray2D.Direction);
