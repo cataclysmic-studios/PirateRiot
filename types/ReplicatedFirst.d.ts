@@ -108,7 +108,7 @@ interface ReplicatedFirst extends Instance {
 		};
 		UI: Folder & {
 			LeaderboardPlayer: Frame & {
-				Name: TextLabel;
+				PlrName: TextLabel;
 				Kills: TextLabel;
 				KDR: TextLabel;
 				Deaths: TextLabel;

@@ -130,8 +130,15 @@ const UIController = Knit.CreateController({
 
     HandleLeaderboard(): void {
         const score = Knit.GetService("ScoreService");
+        const round = Knit.GetService("RoundService");
         const list = main.Leaderboard.PlayerList;
         const lbPlayer = Replicated.Assets.UI.LeaderboardPlayer;
+        const char = Player.Character!;
+        const hum = WaitFor<Humanoid>(char, "Humanoid");
+        hum.Died.Connect(() => {
+            if (round.GetStatus() !== GameStatus.InGame) return;
+            score.AddDeath();
+        });
         score.Changed.Connect(() => {
             for (const plr of Players.GetPlayers()) {
                 let plrFrame = Find<typeof lbPlayer | undefined>(list, plr.Name);
@@ -141,7 +148,7 @@ const UIController = Knit.CreateController({
                 }
 
                 const vals = score.GetScores(plr);
-                plrFrame.Name.Text = plr.Name;
+                plrFrame.PlrName.Text = plr.Name;
                 plrFrame.Kills.Text = tostring(vals.Kills);
                 plrFrame.Deaths.Text = tostring(vals.Deaths);
                 plrFrame.KDR.Text = tostring(vals.KDR).sub(0, 4);

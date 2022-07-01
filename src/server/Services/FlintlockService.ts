@@ -51,11 +51,6 @@ const FlintlockService = Knit.CreateService({
         const scoreMult = serverSettings.GetScoreMultiplier();
         score.AddScore(plr, 100 * scoreMult, "Killed " + char.Name);
         score.AddKill(plr);
-
-        const victim = Players.GetPlayerFromCharacter(char);
-        if (victim)
-            score.AddDeath(victim);
-
         data.Increment(plr, "gold", math.random(10, 100));
     },
 
