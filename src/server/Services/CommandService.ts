@@ -21,7 +21,10 @@ class Command {
 }
 
 const chatted = WaitFor<RemoteEvent>(ReplicatedStorage, "MessageSentRE");
+const sendConsoleMsg = WaitFor<BindableEvent>(ReplicatedStorage, "SendConsoleMsg");
+const reply = (msg: string) => sendConsoleMsg.Fire(msg);
 const data = Knit.GetService("DataService");
+const round = Knit.GetService("RoundService");
 const CommandService = Knit.CreateService({
     Name: "CommandService",
     Commands: new Map<string, Command>([
@@ -29,16 +32,27 @@ const CommandService = Knit.CreateService({
             "addgold", 
             new Command(["addmoney", "addcoins"], (plr, [ amountStr, recipientName ]) => {
                 const amount = tonumber(amountStr);
-                if (!amount || !amountStr)
-                    return Logger.CommandError("addgold", "Gold amount could not be parsed to number");
+                if (!amountStr || !amount)
+                    return reply("Gold amount could not be parsed to number");
 
                 recipientName = recipientName ?? plr.Name;
                 const recipient = Players.GetPlayers().find(p => p.Name.find(recipientName)[0] ? true : false)!;
                 data.Increment(recipient, "gold", amount);
+                reply(`Successfully gave ${amount} gold to ${recipient.Name}`);
+            })
+        ],
+        [
+            "timerspeed", 
+            new Command(["settimerspeed", "countdownspeed"], (plr, [ scaleStr ]) => {
+                const scale = tonumber(scaleStr);
+                if (!scaleStr || !scale)
+                    return reply("Timer speed could not be parsed to a number");
+
+                round.SetTimerSpeed(scale);
+                reply(`Successfully set timer speeds to ${scale}x`);
             })
         ]
     ]),
-
     
     KnitStart(): void {
         const prefix = ".";

@@ -9,6 +9,7 @@ export class TimerHandle {
 
 export class Timer {
     private timeRemaining = 0;
+    private timeScale = 1;
 
     public readonly Count = new Signal<(timeRemaining: number) => void>();
     public readonly OnSet = new Signal<(time: number) => void>();
@@ -17,6 +18,10 @@ export class Timer {
     public constructor(
         private readonly increment = 1
     ) {}
+
+    public SetTimescale(multiplier: number): void {
+        this.timeScale = multiplier;
+    }
 
     public Set(time: number): void {
         this.timeRemaining = time;
@@ -28,7 +33,7 @@ export class Timer {
         task.spawn(() => {
             while (this.timeRemaining > 0) {
                 if (!handle.Active) break;
-                task.wait(1);
+                task.wait(1 / this.timeScale);
                 this.timeRemaining -= this.increment;
                 this.Count.Fire(this.timeRemaining);
             }

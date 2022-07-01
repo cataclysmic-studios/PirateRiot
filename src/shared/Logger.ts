@@ -25,10 +25,6 @@ export default class Logger {
         this.Log(`Util Error : ${methodName}()`, msg, true);
     }
 
-    public static CommandError(cmd: string, msg: unknown): void {
-        this.Log(`Command Error (${cmd})`, msg, false);
-    }
-
     public static KnitError(msg: unknown): void {
         this.Log("Knit Error", msg, true);
     }

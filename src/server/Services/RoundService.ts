@@ -24,7 +24,6 @@ const modes = [new Mode("FFA", 300)];
 const roundTimer = new Timer();
 let roundHandle: TimerHandle;
 let intermissionHandle: TimerHandle;
-
 let map: Model;
 let mode: Mode;
 
@@ -56,6 +55,10 @@ const RoundService = Knit.CreateService({
             const torso = WaitFor<MeshPart>(char, "UpperTorso");
             torso.CFrame = plrSpawn.CFrame.add(new Vector3(0, 10, 0));
         }
+    },
+
+    SetTimerSpeed(multiplier: number): void {
+        roundTimer.SetTimescale(multiplier);
     },
 
     ToggleSpawns(map: Model, on: boolean): void {
